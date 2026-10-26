@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="pt-PT" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Grok Crawler">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#07090d">
+<title>Grok Crawler v2 · aranha digital</title>
+<style>
+  :root { --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+    --sal:env(safe-area-inset-left,0px); --sar:env(safe-area-inset-right,0px); }
+  body, body.th-noite { --bg:#07090d; --fg:#cfe3ff; --mut:#8fa0b8; --lnk:#8794ac; --ui:rgba(7,9,13,.9); --ui2:#0d121b; --uiA:#1a2333;
+    --line:#2a3445; --line2:#151b26; --acc:#5cf2c4; --man:#ffc85a; --hot:#ff4f8b; --txt2:#e6eefb; --badge:#05070a; --gridop:.12;
+    --c-mau:#ff4d4d; --c-medio:#5ab8ff; --c-bom:#4be08a; --c-perfeito:#ffd24a; }
+  body.th-neon { --bg:#07001a; --fg:#f2e9ff; --mut:#a99cc8; --lnk:#a395cc; --ui:rgba(14,4,34,.88); --ui2:#160a33; --uiA:#2a1457;
+    --line:#3d2470; --line2:#23124a; --acc:#00fff0; --man:#ff3df2; --hot:#ff2e88; --txt2:#ffffff; --badge:#07001a; --gridop:.10;
+    --c-mau:#ff3860; --c-medio:#38b6ff; --c-bom:#3dff8c; --c-perfeito:#ffe14d; }
+  body.th-papel { --bg:#f1e9d8; --fg:#2c2a25; --mut:#6f6656; --lnk:#5f5749; --ui:rgba(250,246,236,.95); --ui2:#fffaf0; --uiA:#e8dcc2;
+    --line:#cdbf9f; --line2:#e3d7bd; --acc:#0e8f6e; --man:#c7741a; --hot:#d6336c; --txt2:#2c2a25; --badge:#fffaf0; --gridop:.45;
+    --c-mau:#cc2b2b; --c-medio:#1f6fbf; --c-bom:#1c8c4c; --c-perfeito:#b88400; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--fg); overflow:hidden; overscroll-behavior:none;
+    font-family:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+    touch-action:none; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; -webkit-text-size-adjust:100%; }
+  body { position:fixed; inset:0; transition:background .4s, color .4s; }
+  body::after { content:""; position:fixed; inset:0; pointer-events:none; z-index:1;
+    background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:40px 40px; opacity:var(--gridop); }
+  button { font-family:inherit; touch-action:manipulation; -webkit-user-select:none; user-select:none; color:inherit; }
+
+  #bg { position:fixed; inset:0; z-index:0; pointer-events:none; }
+  #page { position:fixed; inset:0; z-index:2; touch-action:none; }
+  #cv { position:fixed; inset:0; pointer-events:none; z-index:3; }
+
+  /* links */
+  .lnk { position:absolute; font-size:15px; line-height:1.2; color:var(--lnk); text-decoration:none; padding:7px 10px;
+    border:1px solid transparent; border-radius:8px; white-space:nowrap; -webkit-touch-callout:none; -webkit-user-drag:none;
+    transition:color .35s, border-color .35s, background-color .35s, opacity .35s, box-shadow .35s; animation:lnkIn .7s ease-out both; }
+  @keyframes lnkIn { from { opacity:0; } to { opacity:1; } }
+  .lnk .tx { display:inline-block; vertical-align:bottom; max-width:300px; overflow:hidden; text-overflow:ellipsis; }
+  body.dense .lnk { font-size:12.5px; padding:5px 8px; border-radius:6px; }
+  body.dense .lnk .tx { max-width:230px; }
+  body.xdense .lnk { font-size:11px; padding:3px 6px; border-radius:5px; }
+  body.xdense .lnk .tx { max-width:165px; }
+  body.xdense .lnk[data-sc]::after { font-size:9px; height:15px; line-height:15px; min-width:20px; top:-10px; right:-8px; }
+  .lnk.seen { color:var(--fg); border-color:color-mix(in srgb, var(--fg) 55%, transparent); border-style:dotted; }
+  .lnk.visited { --c:var(--acc); color:var(--c); border-color:color-mix(in srgb, var(--c) 50%, transparent);
+    background-color:color-mix(in srgb, var(--c) 11%, transparent); box-shadow:0 0 14px color-mix(in srgb, var(--c) 26%, transparent); }
+  .lnk.t-mau { --c:var(--c-mau); }
+  .lnk.t-mau .tx { text-decoration:line-through; }
+  .lnk.t-medio { --c:var(--c-medio); }
+  .lnk.t-bom { --c:var(--c-bom); }
+  .lnk.t-perfeito { --c:var(--c-perfeito); font-weight:600; box-shadow:0 0 20px color-mix(in srgb, var(--c) 55%, transparent);
+    background-image:linear-gradient(105deg, transparent 35%, color-mix(in srgb, var(--c) 40%, transparent) 50%, transparent 65%);
+    background-size:300% 100%; animation:shimmer 2.6s linear infinite; }
+  .lnk.t-perfeito::before { content:"★ "; }
+  @keyframes shimmer { from { background-position:130% 0; } to { background-position:-130% 0; } }
+  .lnk[data-sc]::after { content:attr(data-sc); position:absolute; right:-10px; top:-11px; min-width:24px; height:17px; padding:0 5px;
+    border-radius:9px; font-size:10px; line-height:17px; font-weight:700; text-align:center; text-decoration:none; display:inline-block;
+    background:var(--c); color:var(--badge); box-shadow:0 0 8px color-mix(in srgb, var(--c) 70%, transparent); }
+  .lnk.reading { color:var(--fg); border-color:var(--fg); animation:rd .3s infinite alternate; }
+  @keyframes rd { to { opacity:.45; } }
+  .lnk.tapped { outline:2px solid var(--fg); outline-offset:3px; }
+  .lnk.off { opacity:.07; }
+  .lnk.flash { outline:2px solid var(--c, var(--fg)); outline-offset:4px; }
+
+  #grok { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); min-width:140px; min-height:64px;
+    padding:14px 32px; font-size:20px; font-weight:600; letter-spacing:.2em; color:var(--bg); background:var(--fg);
+    border:none; border-radius:6px; cursor:pointer; box-shadow:0 0 0 1px var(--fg), 0 0 30px color-mix(in srgb, var(--fg) 30%, transparent);
+    transition:background .2s, color .2s, transform .2s, box-shadow .2s; z-index:2; }
+  #grok::after { content:""; position:absolute; inset:-6px; border-radius:10px; border:1px solid var(--fg); opacity:0; pointer-events:none;
+    animation:ring 2.4s ease-out infinite; }
+  @keyframes ring { 0% { transform:scale(.96); opacity:.55; } 100% { transform:scale(1.25,1.6); opacity:0; } }
+  #grok small { display:block; font-size:10px; letter-spacing:.15em; opacity:.65; margin-top:3px; }
+  #grok.pressed { background:var(--hot); color:#fff; transform:translate(-50%,-50%) scale(.94); box-shadow:0 0 0 1px var(--hot), 0 0 50px var(--hot); }
+
+  .tag { position:absolute; z-index:4; pointer-events:none; font-size:13px; padding:6px 10px; border-radius:6px;
+    background:var(--ui); border-left:3px solid var(--c); color:var(--txt2); max-width:320px; box-shadow:0 6px 20px rgba(0,0,0,.25);
+    transform:translate(-50%,-100%); animation:tagin 2.6s forwards; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tag .bar { height:2px; background:var(--fg); margin-top:4px; animation:bar .7s linear forwards; width:0; }
+  @keyframes bar { to { width:100%; } }
+  .tag b { color:var(--c); font-weight:600; text-transform:uppercase; letter-spacing:.08em; margin-right:6px; }
+  .tag .pts { color:var(--c); margin-left:6px; opacity:.85; }
+  @keyframes tagin { 0%{opacity:0; margin-top:6px} 10%{opacity:1; margin-top:-6px} 80%{opacity:1} 100%{opacity:0; margin-top:-14px} }
+
+  /* barra de topo */
+  #top { position:fixed; z-index:6; left:0; right:0; top:0; display:flex; align-items:center; justify-content:center; flex-wrap:wrap;
+    gap:10px 12px; padding:calc(10px + var(--sat)) calc(14px + var(--sar)) 6px calc(14px + var(--sal)); pointer-events:none; }
+  #top > * { pointer-events:auto; }
+  #modes { display:flex; border:1px solid var(--line); background:var(--ui); border-radius:32px; padding:4px; gap:4px; }
+  #modes button { border:none; background:transparent; color:var(--mut); font-size:15px; min-height:48px;
+    padding:0 18px; border-radius:26px; cursor:pointer; letter-spacing:.05em; transition:all .2s; }
+  #modes button.on[data-m="busca"] { background:var(--acc); color:var(--badge); }
+  #modes button.on[data-m="manual"] { background:var(--man); color:var(--badge); }
+  #goalBox { display:flex; align-items:center; gap:8px; background:var(--ui); border:1px solid var(--line); border-radius:10px; padding:4px 6px 4px 12px; }
+  #goalBox label { font-size:13px; color:var(--mut); }
+  #goal { background:transparent; border:none; border-left:1px solid var(--line); color:var(--c-perfeito); font-family:inherit;
+    font-size:16px; /* >=16px evita o zoom automático do iOS */ padding:10px; width:170px; min-height:44px; outline:none;
+    -webkit-user-select:text; user-select:text; touch-action:manipulation; }
+  #tools { display:flex; gap:6px; background:var(--ui); border:1px solid var(--line); border-radius:12px; padding:4px; }
+  #tools .tb { min-height:46px; min-width:46px; font-size:14px; }
+  #tools .tb.on { border-color:var(--acc); color:var(--acc); }
+  #hint { position:fixed; z-index:5; left:50%; transform:translateX(-50%); font-size:13px; line-height:1.45; color:var(--mut); text-align:center;
+    background:var(--ui); padding:6px 14px; border-radius:6px; max-width:min(92vw, 760px); pointer-events:none; }
+  #hint b { color:var(--fg); }
+
+  /* doca de controlos */
+  #dock { position:fixed; z-index:6; left:calc(12px + var(--sal)); bottom:calc(12px + var(--sab));
+    background:var(--ui); border:1px solid var(--line); border-radius:14px; padding:8px; box-shadow:0 10px 30px rgba(0,0,0,.25); }
+  #btns { display:flex; gap:8px; align-items:stretch; }
+  .tb { min-width:52px; min-height:52px; border:1px solid var(--line); background:var(--ui2); color:var(--fg);
+    font-size:15px; border-radius:10px; padding:0 13px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; }
+  .tb:active { background:var(--uiA); transform:scale(.96); }
+  .tb.big { font-size:22px; padding:0; width:52px; }
+  #rVal { min-width:70px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:11px; color:var(--mut); line-height:1.2; }
+  #rVal b { font-size:17px; color:var(--acc); font-weight:500; }
+  #bModo { border-color:color-mix(in srgb, var(--man) 45%, transparent); color:var(--man); }
+  #bPausa.on { background:var(--hot); border-color:var(--hot); color:#fff; }
+  #ctl { display:flex; gap:10px; align-items:center; margin-top:8px; flex-wrap:wrap; }
+  .ctl { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--mut); }
+  .ctl b { color:var(--acc); font-weight:500; min-width:38px; font-size:13px; }
+  #spd { width:130px; height:40px; accent-color:var(--acc); touch-action:pan-x; }
+  .seg { display:flex; align-items:center; gap:4px; font-size:12px; color:var(--mut); }
+  .seg button { min-width:44px; min-height:40px; border:1px solid var(--line); background:var(--ui2); border-radius:8px; cursor:pointer; font-size:14px; }
+  .seg button.on { background:var(--acc); color:var(--badge); border-color:var(--acc); }
+  #hud { display:grid; grid-template-columns:auto auto; gap:2px 18px; font-size:12px; line-height:1.5; margin-top:8px; padding:0 4px; color:var(--mut); }
+  #hud b { color:var(--acc); font-weight:400; }
+
+  /* painel */
+  #panel { position:fixed; z-index:5; background:var(--ui); border:1px solid var(--line); display:flex; flex-direction:column; font-size:12.5px;
+    box-shadow:0 10px 30px rgba(0,0,0,.25); }
+  #sheetHead { flex:none; display:flex; align-items:center; gap:10px; min-height:52px; padding:0 14px; border:none; background:transparent;
+    color:var(--fg); font-size:13px; letter-spacing:.08em; width:100%; text-align:left; cursor:pointer; border-bottom:1px solid var(--line2); }
+  #sheetHead .grip { width:38px; height:5px; border-radius:3px; background:var(--line); flex:none; }
+  #sheetHead .sum { margin-left:auto; display:flex; gap:10px; font-size:13px; }
+  #sheetHead .sum span { color:var(--c); }
+  #sheetHead .chev { transition:transform .25s; }
+  #panelBody { overflow-y:auto; -webkit-overflow-scrolling:touch; touch-action:pan-y; overscroll-behavior:contain; padding:10px 14px 14px; flex:1; }
+  #panel h4 { margin:14px 0 6px; font-size:11.5px; font-weight:400; color:var(--mut); letter-spacing:.12em; }
+  #panel h4:first-child { margin-top:0; }
+  #mini { display:block; width:100%; height:150px; border:1px solid var(--line); border-radius:8px; background:var(--ui2); cursor:crosshair; touch-action:none; }
+  #top5 { list-style:none; margin:0; padding:0; counter-reset:rk; }
+  #top5:empty::after { content:"ainda sem links classificados"; color:var(--mut); opacity:.7; }
+  #top5 li button { all:unset; box-sizing:border-box; width:100%; cursor:pointer; display:grid; grid-template-columns:22px 1fr auto; gap:4px 8px; align-items:center;
+    padding:5px 6px; border-radius:6px; }
+  #top5 li button:hover, #top5 li button:active { background:var(--uiA); }
+  #top5 .rk { color:var(--mut); font-size:11px; }
+  #top5 .nm { color:var(--txt2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #top5 .pt { color:var(--c); font-weight:600; }
+  #top5 .br { grid-column:2 / 4; height:3px; border-radius:2px; background:var(--line2); overflow:hidden; }
+  #top5 .br i { display:block; height:100%; background:var(--c); }
+  #legend { display:flex; flex-wrap:wrap; gap:6px; }
+  .chip { display:inline-flex; align-items:center; gap:6px; min-height:38px; padding:0 11px; border-radius:19px; cursor:pointer; font-size:12.5px;
+    border:1px solid color-mix(in srgb, var(--c) 60%, transparent); background:color-mix(in srgb, var(--c) 14%, transparent); color:var(--c); transition:opacity .2s; }
+  .chip b { font-weight:600; }
+  .chip.off { opacity:.35; background:transparent; text-decoration:line-through; }
+  .chip.all { --c:var(--mut); }
+  .row { padding:6px 0 6px 9px; border-top:1px solid var(--line2); border-left:3px solid var(--c); margin-top:2px; }
+  .row .hd { display:flex; gap:6px; align-items:baseline; }
+  .row i { font-style:normal; color:var(--c); font-size:11px; letter-spacing:.08em; min-width:70px; }
+  .row em { font-style:normal; color:var(--txt2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .row p { margin:2px 0 0; color:var(--mut); line-height:1.45; }
+  .gold { --c:var(--c-perfeito); border:1px solid color-mix(in srgb, var(--c) 45%, transparent); border-left:3px solid var(--c);
+    background:color-mix(in srgb, var(--c) 8%, transparent); padding:9px 11px; margin-bottom:6px; border-radius:4px; }
+  .gold .ti { color:var(--c); font-size:13.5px; font-weight:600; }
+  .gold .url { color:var(--mut); font-size:11px; word-break:break-all; }
+  .gold p { margin:5px 0; color:var(--txt2); line-height:1.5; }
+  .gold ul { margin:4px 0 0; padding-left:16px; color:var(--mut); }
+  .gold .sc { float:right; color:var(--c); font-weight:600; }
+  #golds:empty::after { content:"ainda nenhuma — a procurar…"; color:var(--mut); opacity:.7; }
+  .exp { display:flex; gap:8px; }
+  .exp .tb { flex:1; min-height:44px; font-size:13px; }
+  #expInfo { color:var(--mut); font-size:11px; margin-top:4px; }
+  #log { font-size:11.5px; color:var(--mut); }
+  #log div { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #log div.hot { color:var(--hot); }
+
+  body.landscape #panel { right:calc(12px + var(--sar)); top:var(--panelTop,80px); bottom:calc(12px + var(--sab)); width:330px; border-radius:14px; }
+  body.landscape #panel.closed { bottom:auto; }
+  body.landscape #panel.closed #panelBody { display:none; }
+  body.landscape #panel:not(.closed) .chev { transform:rotate(180deg); }
+  body.portrait #panel { left:0; right:0; bottom:0; border-radius:18px 18px 0 0; border-bottom:none; max-height:56vh;
+    padding-bottom:var(--sab); transition:max-height .3s ease; }
+  body.portrait #panel.closed { max-height:calc(53px + var(--sab)); }
+  body.portrait #panel.closed #panelBody { overflow:hidden; }
+  body.portrait #panel:not(.closed) .chev { transform:rotate(180deg); }
+  body.portrait #panel:not(.closed) { max-height:50vh; }
+  body.portrait #dock { bottom:calc(53px + 12px + var(--sab)); transition:bottom .3s ease; }
+  body.portrait.sheet-open #dock { bottom:calc(50vh + 12px + var(--sab)); }
+
+  /* introdução */
+  #intro { position:fixed; inset:0; z-index:20; display:flex; align-items:center; justify-content:center; padding:20px;
+    background:color-mix(in srgb, var(--bg) 70%, transparent); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+  #intro[hidden] { display:none; }
+  #introCard { max-width:560px; max-height:calc(100% - 20px); overflow:auto; touch-action:pan-y; background:var(--ui); border:1px solid var(--line);
+    border-radius:16px; padding:22px 24px; box-shadow:0 20px 60px rgba(0,0,0,.4); animation:cardIn .45s ease-out both; }
+  @keyframes cardIn { from { opacity:0; transform:translateY(14px) scale(.98); } to { opacity:1; transform:none; } }
+  #introCard h2 { margin:0 0 4px; font-size:22px; letter-spacing:.06em; }
+  #introCard h2 span { color:var(--acc); font-size:14px; vertical-align:middle; border:1px solid var(--acc); border-radius:10px; padding:1px 7px; margin-left:6px; }
+  #introCard .sub { color:var(--mut); margin:0 0 12px; font-size:13px; }
+  #introCard ul { list-style:none; margin:0; padding:0; font-size:13.5px; line-height:1.5; }
+  #introCard li { padding:7px 0; border-top:1px solid var(--line2); }
+  #introCard li b { color:var(--fg); }
+  #introCard .dots i { font-style:normal; font-weight:600; }
+  #introOk { margin-top:16px; width:100%; min-height:50px; border:none; border-radius:10px; background:var(--acc); color:var(--badge);
+    font-size:16px; font-weight:600; letter-spacing:.08em; cursor:pointer; }
+  kbd { border:1px solid var(--line); padding:0 5px; border-radius:3px; color:var(--fg); font-family:inherit; font-size:.92em; }
+
+  @media (max-width:700px) { #goal { width:120px; } #modes button { padding:0 12px; } .tb { padding:0 9px; } #spd { width:100px; } }
+  @media (prefers-reduced-motion: reduce) {
+    .lnk, .lnk.t-perfeito, .lnk.reading, #grok::after, #introCard { animation:none !important; }
+    .tag { animation:none; } .tag .bar { animation:none; width:100%; }
+    * { transition-duration:.01s !important; }
+  }
+</style>
+</head>
+<body class="landscape th-noite">
+<div id="safe" style="position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)"></div>
+<canvas id="bg"></canvas>
+<div id="page"><button id="grok" type="button">GROK<small>→ manual</small></button></div>
+<canvas id="cv"></canvas>
+
+<div id="top">
+  <div id="modes">
+    <button type="button" data-m="busca" class="on">⟳ AUTOMÁTICO</button>
+    <button type="button" data-m="manual">✍ MANUAL</button>
+  </div>
+  <div id="goalBox"><label for="goal">objetivo</label><input id="goal" value="web crawler" spellcheck="false" autocomplete="off" autocapitalize="off" enterkeyhint="done"></div>
+  <div id="tools">
+    <button type="button" class="tb" id="bTema" title="Tema (T)">◐ <span id="temaNome">noite</span></button>
+    <button type="button" class="tb" id="bSom" title="Sons" aria-pressed="false">🔇 Sons</button>
+    <button type="button" class="tb" id="bAjuda" title="Ajuda" aria-label="Ajuda">?</button>
+  </div>
+</div>
+<div id="hint"></div>
+
+<div id="dock">
+  <div id="btns">
+    <button type="button" class="tb big" id="bRmenos" aria-label="Diminuir raio">−</button>
+    <div id="rVal"><b id="hR">160</b>raio px</div>
+    <button type="button" class="tb big" id="bRmais" aria-label="Aumentar raio">+</button>
+    <button type="button" class="tb" id="bModo">⇄ Modo</button>
+    <button type="button" class="tb" id="bReset">↻ Novo site</button>
+    <button type="button" class="tb" id="bPausa" title="Espaço">⏸ Pausar</button>
+  </div>
+  <div id="ctl">
+    <div class="ctl"><label for="spd">velocidade</label><input type="range" id="spd" min="0.5" max="3" step="0.25" value="1"><b id="spdV">1×</b></div>
+    <div class="seg" id="nLinks"><span>links</span><button type="button" data-n="20">20</button><button type="button" data-n="40" class="on">40</button><button type="button" data-n="80">80</button></div>
+  </div>
+  <div id="hud">
+    <span>modo: <b id="hMode">automático</b></span><span>entrada: <b id="hIn">—</b></span>
+    <span>estado: <b id="hState">a explorar</b></span><span>pressão: <b id="hP">—</b></span>
+    <span>detetados: <b id="hSeen">0</b>/<span id="hTot">0</span> · visitados: <b id="hVis">0</b></span><span>Grok: <b id="hGrok">0</b></span>
+  </div>
+</div>
+
+<div id="panel">
+  <button type="button" id="sheetHead"><span class="grip"></span><span>PAINEL</span><span class="chev">▾</span><span class="sum" id="sum"></span></button>
+  <div id="panelBody">
+    <h4>MAPA DA TEIA</h4>
+    <canvas id="mini"></canvas>
+    <h4>TOP 5 · MELHOR PONTUAÇÃO</h4>
+    <ol id="top5"></ol>
+    <h4>★ ESCOLHAS PERFEITAS</h4>
+    <div id="golds"></div>
+    <h4>FILTRO · toca nas cores</h4>
+    <div id="legend"></div>
+    <h4>ÚLTIMOS LIDOS</h4>
+    <div id="reads"></div>
+    <h4>RELATÓRIO</h4>
+    <div class="exp"><button type="button" class="tb" id="bJson">⤓ Exportar JSON</button><button type="button" class="tb" id="bCsv">⤓ Exportar CSV</button></div>
+    <div id="expInfo">0 links no relatório</div>
+    <h4>REGISTO</h4>
+    <div id="log"></div>
+  </div>
+</div>
+
+<div id="intro" hidden>
+  <div id="introCard" role="dialog" aria-modal="true" aria-labelledby="introT">
+    <h2 id="introT">🕷 Grok Crawler <span>v2</span></h2>
+    <p class="sub">Uma aranha digital que percorre um site, lê cada link e tece a teia do que encontra.</p>
+    <ul>
+      <li><b>⟳ Automático</b> — a aranha procura sozinha os links por tocar. Toca num link para o tornar o próximo alvo.</li>
+      <li><b>✍ Manual</b> — arrasta o rato, o dedo ou a Apple Pencil: tudo o que entra no raio é detetado e lido.</li>
+      <li><b>GROK</b> — carrega para mudar de modo. Em automático, a aranha leva-lhe as escolhas perfeitas.</li>
+      <li class="dots"><b>Cores</b> — <i style="color:var(--c-mau)">vermelho</i> evitar · <i style="color:var(--c-medio)">azul</i> médio · <i style="color:var(--c-bom)">verde</i> bom · <i style="color:var(--c-perfeito)">★ dourado</i> perfeito. Cada link mostra uma pontuação de 0 a 100; toca nas cores do painel para filtrar.</li>
+      <li><b>✎ Apple Pencil</b> — mais pressão = raio maior; a inclinação orienta o cone; a pairar só pré-visualiza. Pinça com dois dedos muda o raio; toque com dois dedos muda de modo.</li>
+      <li><b>Teclas</b> — <kbd>M</kbd> modo · <kbd>R</kbd> novo site · <kbd>+</kbd>/<kbd>−</kbd> raio · <kbd>Espaço</kbd> pausa · <kbd>T</kbd> tema</li>
+    </ul>
+    <button type="button" id="introOk">COMEÇAR</button>
+  </div>
+</div>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const page = $('page'), grok = $('grok');
+  const cv = $('cv'), ctx = cv.getContext('2d');
+  const bg = $('bg'), bctx = bg.getContext('2d');
+  const mini = $('mini'), mctx = mini.getContext('2d');
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const ease = t => t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2;
+  const TAU = Math.PI * 2;
+  const R_MIN = 60, R_MAX = 400;
+  const txtCache = {};
+  const setTxt = (id, v) => { if (txtCache[id] !== v) { txtCache[id] = v; $(id).textContent = v; } };
+  const esc = x => String(x).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const store = {
+    get(k){ try { return window.localStorage ? localStorage.getItem(k) : null; } catch(_) { return null; } },
+    set(k, v){ try { if (window.localStorage) localStorage.setItem(k, v); } catch(_) {} }
+  };
+  const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+  // ---------- Movimento reduzido ----------
+  const mq = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : null;
+  let RM = !!(mq && mq.matches);
+  if (mq) { const f = e => { RM = e.matches; bgDirty = true; }; if (mq.addEventListener) mq.addEventListener('change', f); else if (mq.addListener) mq.addListener(f); }
+
+  // ---------- Temas ----------
+  const THEMES = {
+    noite: { ink:'#cfe3ff', body:'#0b0f16', acc:'92,242,196', man:'255,200,90', hot:'255,79,139', thread:'#3e8f78', shadow:'rgba(0,0,0,.55)',
+      add:'lighter', bg0:'#0d1424', bg1:'#04060a', neb:['40,90,160','110,40,140'], nebA:.16, star:'207,227,255', starA:.8, meta:'#07090d', eye:'#5cf2c4', mark:'#ff4f8b',
+      cores:{ perfeito:'#ffd24a', bom:'#4be08a', medio:'#5ab8ff', mau:'#ff4d4d' } },
+    neon:  { ink:'#f2e9ff', body:'#12052e', acc:'0,255,240', man:'255,61,242', hot:'255,46,136', thread:'#8c50ff', shadow:'rgba(0,0,0,.6)',
+      add:'lighter', bg0:'#1c0748', bg1:'#03000a', neb:['255,0,170','0,190,255'], nebA:.2, star:'255,225,255', starA:.9, meta:'#07001a', eye:'#00fff0', mark:'#ff2e88',
+      cores:{ perfeito:'#ffe14d', bom:'#3dff8c', medio:'#38b6ff', mau:'#ff3860' } },
+    papel: { ink:'#2c2a25', body:'#f7f0df', acc:'14,143,110', man:'199,116,26', hot:'214,51,108', thread:'#8a7a5c', shadow:'rgba(70,45,10,.22)',
+      add:'source-over', bg0:'#f8f2e4', bg1:'#e4d8bf', neb:['210,170,110','150,180,165'], nebA:.22, star:'90,70,40', starA:.35, meta:'#f1e9d8', eye:'#0e8f6e', mark:'#d6336c',
+      cores:{ perfeito:'#b88400', bom:'#1c8c4c', medio:'#1f6fbf', mau:'#cc2b2b' } },
+  };
+  const THEME_ORDER = ['noite', 'neon', 'papel'];
+  let thName = THEMES[store.get('gc2.tema')] ? store.get('gc2.tema') : 'noite';
+  let TH = THEMES[thName];
+  const rgbCache = {};
+  function hexRgb(h){ if (rgbCache[h]) return rgbCache[h]; const n = parseInt(h.slice(1), 16); return rgbCache[h] = ((n>>16)&255) + ',' + ((n>>8)&255) + ',' + (n&255); }
+
+  // ---------- Estado ----------
+  const S = { x:80, y:300, vx:0, vy:0, ang:0, angT:0, t:0, R:160, Rbase:160, target:null, mode:'busca', pause:0, grokCount:0, sweepAng:0,
+    speed:1, paused:false, nLinks:40, siteNo:0, ordem:0, visCount:0, sonar:0, trail:[], anchor:null, rebuilding:false };
+  const nStored = +store.get('gc2.links'); if ([20,40,80].includes(nStored)) S.nLinks = nStored;
+  let links = [], edges = [];
+  const particles = [], pulses = [], ripples = [];
+  const history = [];                 // relatório: todos os links lidos nesta sessão
+  const hidden = new Set();           // filtro de cores
+  let bgDirty = true, miniDirty = true, top5Dirty = true;
+
+  // ---------- Som (WebAudio, só depois de um gesto) ----------
+  const SND = {
+    on:false, ac:null, last:0,
+    toggle(){
+      this.on = !this.on;
+      if (this.on && !this.ac) { try { const AC = window.AudioContext || window.webkitAudioContext; this.ac = AC ? new AC() : null; } catch(_) { this.ac = null; } if (!this.ac) this.on = false; }
+      if (this.on && this.ac && this.ac.state === 'suspended') this.ac.resume().catch(() => {});
+      return this.on;
+    },
+    blip(f, dur, type, vol, slide, at){
+      const ac = this.ac, t = ac.currentTime + (at || 0);
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type || 'sine'; o.frequency.setValueAtTime(f, t);
+      if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f + slide), t + dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || .04, t + .008); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur + .03);
+    },
+    play(kind){
+      if (!this.on || !this.ac) return;
+      const now = performance.now();
+      if (kind === 'seen' && now - this.last < 70) return;
+      this.last = now;
+      try {
+        switch (kind) {
+          case 'seen': this.blip(1500, .05, 'sine', .015); break;
+          case 'perfeito': [784, 988, 1319].forEach((f, i) => this.blip(f, .22, 'triangle', .05, 0, i*.07)); break;
+          case 'bom': this.blip(880, .12, 'triangle', .04); break;
+          case 'medio': this.blip(620, .1, 'sine', .035); break;
+          case 'mau': this.blip(170, .18, 'square', .025, -70); break;
+          case 'grok': this.blip(520, .16, 'sawtooth', .025, 520); break;
+          case 'modo': this.blip(440, .08, 'sine', .04); this.blip(660, .08, 'sine', .04, 0, .07); break;
+          case 'raio': this.blip(300 + S.Rbase, .05, 'sine', .02); break;
+        }
+      } catch(_) {}
+    }
+  };
+
+  // ---------- Layout / zona livre ----------
+  let W = innerWidth, H = innerHeight, DPR = Math.min(2, window.devicePixelRatio || 1);
+  const free = { x0:20, y0:120, x1:W-20, y1:H-40 };
+  let portrait = H > W;
+  let stars = [];
+  function makeStars(){
+    const n = clamp(Math.round(W*H/5200), 80, 320);
+    stars = Array.from({ length:n }, () => ({ x:Math.random()*W, y:Math.random()*H, z:Math.random() < .55 ? 0 : Math.random() < .7 ? 1 : 2,
+      ph:Math.random()*TAU, tw:.02 + Math.random()*.05, s:.6 + Math.random()*1.2 }));
+  }
+  function sizeCanvas(){
+    W = innerWidth; H = innerHeight; DPR = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.round(W*DPR); cv.height = Math.round(H*DPR); cv.style.width = W+'px'; cv.style.height = H+'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    bg.width = W; bg.height = H; bg.style.width = W+'px'; bg.style.height = H+'px';   // fundo suave: resolução 1x chega
+    makeStars(); bgDirty = true; sizeMini();
+  }
+  function sizeMini(){
+    const w = mini.clientWidth || 300, h = mini.clientHeight || 150, d = Math.min(2, window.devicePixelRatio || 1);
+    if (mini.width !== Math.round(w*d) || mini.height !== Math.round(h*d)) { mini.width = Math.round(w*d); mini.height = Math.round(h*d); }
+    mctx.setTransform(d,0,0,d,0,0); miniDirty = true;
+  }
+  function computeLayout(){
+    portrait = H > W;
+    document.body.classList.toggle('portrait', portrait); document.body.classList.toggle('landscape', !portrait);
+    document.body.classList.toggle('sheet-open', portrait && !$('panel').classList.contains('closed'));
+    const top = $('top').getBoundingClientRect(), hs = $('hint').style;
+    hs.top = (top.bottom + 4) + 'px';
+    if (portrait) { hs.left = '50%'; hs.maxWidth = ''; }
+    else { const pl = $('panel').getBoundingClientRect().left; hs.left = (pl/2) + 'px'; hs.maxWidth = Math.max(300, pl - 40) + 'px'; }
+    document.documentElement.style.setProperty('--panelTop', (top.bottom + 4) + 'px');
+    const hint = $('hint').getBoundingClientRect(), pan = $('panel').getBoundingClientRect();
+    const cs = getComputedStyle($('safe'));   // margens seguras reais (barra inicial do iPad, etc.)
+    const sal = parseFloat(cs.paddingLeft) || 0, sar = parseFloat(cs.paddingRight) || 0, sab = parseFloat(cs.paddingBottom) || 0;
+    free.x0 = 16 + sal; free.y0 = Math.max(top.bottom, hint.bottom) + 14;
+    free.x1 = portrait ? W - 16 - sar : pan.left - 14;
+    free.y1 = portrait ? H - sab - 53 - 12 : H - 14 - sab;      // a doca é tratada como obstáculo (ver obstacles)
+    if (free.y1 - free.y0 < 220) free.y1 = free.y0 + 220;
+    // GROK no centro da zona livre acima da doca
+    const dock = $('dock').getBoundingClientRect();
+    const gy1 = Math.min(free.y1, dock.top - 10);
+    grok.style.left = ((free.x0 + free.x1)/2) + 'px'; grok.style.top = ((free.y0 + Math.max(free.y0 + 200, gy1))/2) + 'px';
+    sizeMini();
+  }
+  const overlaps = (a, b, m, my) => { if (my === undefined) my = m; return a.x < b.x + b.w + m && a.x + a.w + m > b.x && a.y < b.y + b.h + my && a.y + a.h + my > b.y; };
+  function grokBox(){ const r = grok.getBoundingClientRect(); return { x:r.left-34, y:r.top-30, w:r.width+68, h:r.height+60 }; }
+  function obstacles(){
+    const d = $('dock').getBoundingClientRect();
+    return [grokBox(), { x:d.left - 14, y:d.top - 16, w:d.width + 28, h:d.height + 30 }];
+  }
+
+  // ---------- Site falso ----------
+  // colocação: "melhor candidato" (Mitchell) — sem sobreposições, o mais espaçado possível, fora da interface e do GROK
+  function placeLink(l, boxes, pref, obst){
+    const w = l.el.offsetWidth, h = l.el.offsetHeight, fw = Math.max(1, free.x1 - free.x0 - w - 10), fh = Math.max(1, free.y1 - free.y0 - h - 10);
+    const gx = dens === 2 ? 8 : 12, gy = dens === 2 ? 5 : 8;
+    let best = null, bestS = Infinity, good = 0;
+    for (let tries = 0; tries < 260; tries++) {
+      let nx, ny;
+      if (pref && tries < 40) { const s = .015 + tries*.01; nx = clamp(pref.nx + (tries ? (Math.random()-.5)*s*2 : 0), 0, 1); ny = clamp(pref.ny + (tries ? (Math.random()-.5)*s*2 : 0), 0, 1); }
+      else { nx = Math.random(); ny = Math.random(); }
+      const b = { x: free.x0 + 5 + nx*fw, y: free.y0 + 5 + ny*fh, w, h, nx, ny };
+      let s = 0;
+      for (const o of obst) if (overlaps(b, o, 0)) s += 1e6;
+      for (const o of boxes) if (overlaps(b, o, gx, gy)) s += 1e4;
+      if (s === 0) {
+        if (pref) { best = b; break; }
+        let md = 1e9; const cx = b.x + w/2, cy = b.y + h/2;
+        for (const o of boxes) { const d = Math.hypot(o.x + o.w/2 - cx, o.y + o.h/2 - cy); if (d < md) md = d; }
+        s = -Math.min(md, 400); good++;
+      }
+      if (s < bestS) { best = b; bestS = s; }
+      if (!pref && good >= 12) break;
+    }
+    l.nx = best.nx; l.ny = best.ny; l.el.style.left = best.x + 'px'; l.el.style.top = best.y + 'px';
+    boxes.push(best);
+  }
+  let dens = 0;   // 0 normal · 1 denso · 2 muito denso (letra mais pequena para caberem 80 links sem sobreposição)
+  function pickDensity(n){
+    const zone = (free.x1 - free.x0) * (free.y1 - free.y0), obs = obstacles().reduce((a, o) => a + o.w * o.h, 0);
+    const per = Math.max(1, zone - obs*.8) / n;
+    dens = per > 19000 ? 0 : per > 9500 ? 1 : 2;
+    document.body.classList.toggle('dense', dens === 1); document.body.classList.toggle('xdense', dens === 2);
+  }
+  function countOverlaps(list){ let n = 0; for (let i = 0; i < list.length; i++) for (let j = i+1; j < list.length; j++) if (overlaps(list[i], list[j], 0)) n++; return n; }
+  function layoutAll(list, prefOf){
+    const obst = obstacles(); let bestRun = null;
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const boxes = [];
+      list.forEach(l => placeLink(l, boxes, prefOf && attempt === 0 ? prefOf(l) : null, obst));
+      const ov = countOverlaps(boxes);
+      if (!bestRun || ov < bestRun.ov) bestRun = { ov, pos: list.map(l => [l.nx, l.ny, l.el.style.left, l.el.style.top]) };
+      if (!ov) break;
+    }
+    if (bestRun.ov) { if (shelfLayout(list, obst, 0) !== null || shelfLayout(list, obst, 1) !== null || shelfLayout(list, obst, 2) !== null) return 0; }   // plano B: prateleiras com desvios aleatórios
+    list.forEach((l, i) => { const p = bestRun.pos[i]; l.nx = p[0]; l.ny = p[1]; l.el.style.left = p[2]; l.el.style.top = p[3]; });
+    return bestRun.ov;
+  }
+  // arrumação em "prateleiras": garante zero sobreposições em ecrãs cheios (80 links), com espaçamento e desvios aleatórios
+  function shelfLayout(list, obst, tight){
+    const gx = [dens === 2 ? 10 : 14, 5, 2][tight], h = Math.max(...list.map(l => l.el.offsetHeight));
+    const zoneH = free.y1 - free.y0 - 10, rows = Math.max(1, Math.floor(zoneH / (h + [7, 3, 1][tight]))), rowH = zoneH / rows;
+    const R = []; let total = 0;
+    for (let r = 0; r < rows; r++) {
+      const y = free.y0 + 5 + r*rowH, yb = y + rowH;
+      let segs = [[free.x0 + 4, free.x1 - 4]];
+      obst.forEach(o => { if (o.y < yb && o.y + o.h > y) { const ns = [];
+        segs.forEach(([a, b]) => { if (o.x >= b || o.x + o.w <= a) ns.push([a, b]); else { if (o.x > a) ns.push([a, o.x]); if (o.x + o.w < b) ns.push([o.x + o.w, b]); } });
+        segs = ns; } });
+      segs = segs.filter(s => s[1] - s[0] > [60, 30, 20][tight]); segs.forEach(s => total += s[1] - s[0]); R.push({ y, segs });
+    }
+    const items = shuffle(list.slice()), need = items.reduce((a, l) => a + l.el.offsetWidth + gx, 0);
+    for (let f = Math.min(1, need / Math.max(1, total)); f <= 1.0001; f += .03) {
+      let idx = 0, carry = 0; const plan = [];
+      for (const row of R) for (const sg of row.segs) {
+        const len = sg[1] - sg[0], budget = len * f + carry, put = []; let used = 0;
+        while (idx < items.length) { const w = items[idx].el.offsetWidth + gx; if (used + w > len || used + w*.5 > budget) break; put.push(items[idx]); used += w; idx++; }
+        carry = budget - used; plan.push({ row, sg, put, used });
+      }
+      if (idx < items.length) continue;
+      plan.forEach(({ row, sg, put, used }) => {
+        const g = (sg[1] - sg[0] - used) / (put.length + 1); let x = sg[0];
+        put.forEach(l => { x += g; const w = l.el.offsetWidth, jx = (Math.random() - .5) * g * .7;
+          const lx = x + gx/2 + jx, ly = row.y + (rowH - h)/2 + (Math.random() - .5) * Math.max(0, rowH - h - 6);
+          l.el.style.left = lx + 'px'; l.el.style.top = ly + 'px';
+          l.nx = (lx - free.x0 - 5) / Math.max(1, free.x1 - free.x0 - w - 10); l.ny = (ly - free.y0 - 5) / Math.max(1, free.y1 - free.y0 - h - 10);
+          x += w + gx; });
+      });
+      return 0;
+    }
+    return null;
+  }
+  function buildSite(){
+    links.forEach(l => l.el.remove()); links = []; edges = []; S.anchor = null;
+    document.querySelectorAll('.tag').forEach(t => t.remove());
+    Object.keys(counts).forEach(k => counts[k] = 0); renderLegend(); $('reads').innerHTML = ''; $('golds').innerHTML = '';
+    S.siteNo++;
+    const n = S.nLinks;
+    pickDensity(n);
+    const deck = makeDeck(n), list = [];
+    for (let i = 0; i < n; i++) {
+      const a = document.createElement('a'); a.className = 'lnk'; a.href = '#'; a.draggable = false;
+      const pg = deck[i], tx = document.createElement('span'); tx.className = 'tx'; tx.textContent = pg.t; a.appendChild(tx); a.title = pg.t;
+      a.style.left = '-999px'; a.style.top = '0px';
+      a.style.animationDelay = (RM ? 0 : Math.min(900, i*14)) + 'ms';
+      a.addEventListener('click', e => e.preventDefault());
+      page.appendChild(a);
+      list.push({ el:a, seen:false, visited:false, cx:0, cy:0, page:pg, id:i });
+    }
+    // os mais largos primeiro: arrumam-se melhor
+    const ov = layoutAll(list.slice().sort((p, q) => q.el.offsetWidth - p.el.offsetWidth), null);
+    if (ov) log('aviso: ' + ov + ' links sobrepostos (ecrã pequeno)');
+    links = list;
+    measure(); $('hTot').textContent = links.length; updHud(); top5Dirty = true; miniDirty = true; updExpInfo();
+  }
+  function resetSite(msg){
+    S.target = null; S.visCount = 0; S.lastGrokAt = null; S.finalGrok = false; S.pause = 0; S.rebuilding = false;
+    buildSite(); if (msg) log(msg, true);
+  }
+  // reorganiza os links existentes (mantém estado e classificação) quando a zona livre muda
+  function relayoutLinks(){
+    const prevD = dens; pickDensity(links.length || S.nLinks);
+    if (prevD !== dens) links.forEach(l => { l.el.style.left = '-999px'; });
+    layoutAll(links.slice().sort((p, q) => q.el.offsetWidth - p.el.offsetWidth), l => ({ nx:l.nx, ny:l.ny }));
+    measure(); miniDirty = true;
+  }
+  function measureOne(l){ const r = l.el.getBoundingClientRect(); l.cx = r.left + r.width/2; l.cy = r.top + r.height/2; l.box = r; }
+  function measure(){ links.forEach(measureOne); }
+
+  // ---------- Conteúdo dos destinos ----------
+  const LIB = [
+    { t:'Como funcionam os web crawlers', u:'https://grok.x/blog/como-funcionam-crawlers', ti:'Como funcionam os web crawlers',
+      d:'Artigo técnico sobre filas de URLs, indexação e boas maneiras de um crawler.', k:'web crawler crawlers spider indexação fila links robots', q:92, min:9,
+      rich:'Explica o ciclo completo de um crawler: URLs-semente, fila de prioridade, descarga, extração de links e deduplicação. Tem diagramas claros e exemplos em JavaScript, e dedica uma secção a respeitar o robots.txt e a limitar pedidos por segundo.' },
+    { t:'Guia: construir um crawler em JS', u:'https://grok.x/docs/guia-crawler-js', ti:'Guia completo: construir um crawler em JavaScript',
+      d:'Tutorial prático com código, do fetch ao grafo de links.', k:'web crawler javascript js tutorial fetch grafo links spider', q:90, min:14,
+      rich:'Tutorial passo a passo que constrói um crawler funcional em JavaScript: pedidos com fetch, parsing de HTML, normalização de URLs, uma fila com limite de profundidade e visualização do grafo de links. Cada passo tem código pronto a correr e exercícios no fim.' },
+    { t:'robots.txt explicado para crawlers', u:'https://wiki.org/robots-txt-crawlers', ti:'robots.txt explicado: regras para web crawlers',
+      d:'Referência sobre as diretivas Allow, Disallow e Crawl-delay.', k:'robots crawler web regras disallow sitemap spider', q:86, min:6,
+      rich:'Referência curta e fiável sobre como um crawler deve ler o robots.txt: precedência entre Allow e Disallow, user-agents, Crawl-delay e a ligação ao sitemap. Inclui casos ambíguos e o comportamento dos motores de busca principais.' },
+    { t:'PageRank em 5 minutos', u:'https://wiki.org/pagerank-crawlers', ti:'PageRank: como a web se ordena a partir dos links',
+      d:'Explicação visual de como os links dão importância às páginas.', k:'web crawler grafo links pagerank ranking indexação', q:84, min:5,
+      rich:'Mostra, com animações simples, como um crawler transforma links num grafo e como o PageRank distribui importância por esse grafo. Bom ponto de partida para perceber porque é que alguns links valem mais do que outros.' },
+    { t:'Crawling educado: limites e cache', u:'https://grok.x/blog/crawling-educado', ti:'Crawling educado: limites, cache e cabeçalhos',
+      d:'Boas práticas para não sobrecarregar servidores.', k:'web crawler robots cache limites pedidos etiqueta', q:85, min:8,
+      rich:'Guia prático de etiqueta para crawlers: limitar pedidos por domínio, usar If-Modified-Since e ETag, respeitar o Crawl-delay e identificar-se no User-Agent. Inclui uma checklist para pôr um crawler em produção sem incomodar ninguém.' },
+    { t:'Sitemaps XML para crawlers', u:'https://wiki.org/sitemaps-xml', ti:'Sitemaps XML: o mapa que os crawlers leem',
+      d:'Como um sitemap ajuda a descobrir páginas mais depressa.', k:'sitemap web crawler indexação xml descoberta', q:82, min:6,
+      rich:'Descreve o formato dos sitemaps XML, índices de sitemaps, lastmod e prioridades, e como um crawler os combina com a descoberta por links. Tem exemplos reais e erros comuns a evitar.' },
+    { t:'Documentação da API', u:'https://grok.x/docs/api', ti:'Documentação da API', d:'Referência oficial dos endpoints, com exemplos.', k:'api docs referência endpoints', q:82 },
+    { t:'Wikipedia: Aranha', u:'https://wiki.org/wiki/Aranha', ti:'Aranha — Wikipedia', d:'Artigo enciclopédico sobre aracnídeos.', k:'aranha teia spider aracnídeos', q:78 },
+    { t:'A história da web', u:'https://wiki.org/historia-da-web', ti:'A história da World Wide Web', d:'Do CERN aos primeiros motores de busca.', k:'web história motores busca', q:80 },
+    { t:'Post: 10 truques de CSS', u:'https://grok.x/blog/10-truques-css', ti:'10 truques de CSS', d:'Artigo curto com dicas de layout e animação.', k:'css layout animação', q:74 },
+    { t:'Ensaio sobre redes', u:'https://wiki.org/ensaios/redes', ti:'Ensaio sobre redes e grafos', d:'Texto de leitura sobre grafos e ligações.', k:'redes grafos links ligações', q:76 },
+    { t:'Manual de referência', u:'https://grok.x/docs/manual', ti:'Manual de referência', d:'Manual completo do produto, bem organizado.', k:'manual referência docs', q:79 },
+    { t:'Guia de instalação', u:'https://grok.x/docs/instalar', ti:'Guia de instalação', d:'Passos claros para instalar e configurar.', k:'instalação guia setup', q:77 },
+    { t:'Blog: segurança na web', u:'https://grok.x/blog/seguranca-web', ti:'Segurança na web: o essencial', d:'HTTPS, cookies e cabeçalhos de segurança explicados.', k:'segurança web https cookies', q:73 },
+    { t:'Notícias de tecnologia', u:'https://grok.x/noticias', ti:'Notícias de tecnologia', d:'Resumo diário de novidades da web.', k:'notícias tecnologia web', q:68 },
+    { t:'https://grok.x/sitemap.xml', u:'https://grok.x/sitemap.xml', ti:'Sitemap', d:'Lista de todas as páginas do site, útil para indexar.', k:'sitemap crawler páginas', q:62 },
+    { t:'Fórum da comunidade', u:'https://grok.x/forum', ti:'Fórum da comunidade', d:'Discussões com qualidade muito variável.', k:'fórum comunidade', q:62 },
+    { t:'Changelog', u:'https://grok.x/changelog', ti:'Registo de alterações', d:'Lista de versões e correções.', k:'versões changelog', q:60 },
+    { t:'Contactos', u:'https://grok.x/contacto', ti:'Contactos', d:'Página de contacto com formulário.', k:'contacto', q:55 },
+    { t:'Página inicial', u:'https://grok.x/', ti:'Grok — início', d:'Página inicial, sobretudo navegação.', k:'início', q:58 },
+    { t:'Termos de utilização', u:'https://grok.x/termos', ti:'Termos de utilização', d:'Texto legal, longo e pouco útil para a busca.', k:'termos legal', q:52 },
+    { t:'Perguntas frequentes', u:'https://grok.x/faq', ti:'FAQ', d:'Respostas curtas a dúvidas comuns.', k:'faq dúvidas', q:60 },
+    { t:'Arquivo de artigos', u:'https://grok.x/archive/2026', ti:'Arquivo 2026', d:'Lista cronológica de artigos, sem conteúdo próprio.', k:'arquivo artigos', q:56 },
+    { t:'Newsletter', u:'https://grok.x/newsletter', ti:'Subscrever a newsletter', d:'Formulário de subscrição, pouco conteúdo.', k:'newsletter email', q:50 },
+    { t:'youtube.com/watch', u:'https://youtube.com/watch?v=x9', ti:'Vídeo externo', d:'Vídeo de outro site, conteúdo desconhecido.', k:'vídeo', q:50, f:['ext'] },
+    { t:'Entrar na conta', u:'https://grok.x/login', ti:'Iniciar sessão', d:'Página de login legítima do próprio site.', k:'login conta', q:54 },
+    { t:'/tags/js', u:'https://grok.x/tags/js', ti:'Etiqueta: js', d:'Listagem de posts com a etiqueta js.', k:'js tags', q:57 },
+    { t:'https://cdn.net/assets/main.css', u:'https://cdn.net/assets/main.css', ti:'Folha de estilos', d:'Ficheiro técnico, sem texto para ler.', k:'css', q:45, f:['thin'] },
+    { t:'bit.ly/3xYz9', u:'https://bit.ly/3xYz9', ti:'Link encurtado', d:'Encurtador que esconde o destino final.', k:'', q:40, f:['redirect','ext'] },
+    { t:'Ganhe um iPhone grátis!', u:'http://promo-gratis.xyz/ganhe', ti:'PARABÉNS! Foi selecionado', d:'Página de prémio falso que pede dados pessoais.', k:'prémio grátis', q:15, f:['phishing','popup'] },
+    { t:'Entrar — verifique a sua conta', u:'https://grok-x-login.co/verify', ti:'Verificação de conta', d:'Imita o login do Grok num domínio parecido mas falso.', k:'login conta', q:20, f:['lookalike','phishing'] },
+    { t:'download-crack.exe', u:'http://files-free.ru/crack.exe', ti:'Download', d:'Executável de origem duvidosa.', k:'download', q:10, f:['download','http'] },
+    { t:'https://cdn.net/tracker.js?id=42', u:'https://cdn.net/tracker.js?id=42', ti:'Script de rastreio', d:'Script que segue o utilizador entre sites.', k:'tracker', q:25, f:['tracker'] },
+    { t:'Clique aqui!!!', u:'http://ads.click-now.biz/r?=99', ti:'Redirecionamento de anúncio', d:'Cadeia de redirecionamentos publicitários.', k:'anúncio', q:20, f:['ads','popup','http'] },
+    { t:'Aceite os cookies!!!', u:'http://cookies-ok.top/aceitar', ti:'Pop-up de cookies', d:'Pop-up insistente que partilha dados com terceiros.', k:'cookies', q:30, f:['popup','tracker','http'] },
+    { t:'/blog/post-antigo-404', u:'https://grok.x/blog/post-antigo', ti:'404 — página não encontrada', d:'Link partido, o destino já não existe.', k:'', q:30, f:['broken'] },
+  ];
+  const FILL = [
+    { t:'/docs/v{n}', ti:'Docs versão {n}', d:'Documentação de uma versão antiga.', k:'docs', q:63 },
+    { t:'https://wiki.org/artigo/{n}', ti:'Artigo {n} da wiki', d:'Artigo genérico da wiki.', k:'wiki artigo', q:68 },
+    { t:'https://wiki.org/crawler/{n}', ti:'Nota {n} sobre crawlers', d:'Nota curta da wiki sobre web crawlers.', k:'web crawler wiki nota', q:58 },
+    { t:'/user/{n}', ti:'Perfil de utilizador', d:'Perfil público com pouca informação.', k:'perfil', q:50 },
+    { t:'/blog/{n}', ti:'Post {n}', d:'Post de blog sobre temas variados.', k:'blog post', q:66 },
+    { t:'/categoria/{n}', ti:'Categoria {n}', d:'Listagem de páginas sem texto próprio.', k:'categoria', q:52 },
+    { t:'/rss/{n}.xml', ti:'Feed RSS', d:'Feed técnico com resumos de posts.', k:'rss feed', q:55, f:['thin'] },
+    { t:'https://cdn.net/img/{n}.png', ti:'Imagem', d:'Ficheiro de imagem, sem texto.', k:'imagem', q:46, f:['thin'] },
+    { t:'/search?q={n}', ti:'Resultados de pesquisa', d:'Página gerada dinamicamente, conteúdo repetido.', k:'pesquisa', q:48, f:['thin'] },
+    { t:'http://free-{n}.click/oferta', ti:'Oferta imperdível', d:'Página de anúncios com redirecionamentos.', k:'oferta', q:25, f:['ads','http'] },
+  ];
+  const RISK = { phishing:[80,'pede dados pessoais (phishing)'], lookalike:[70,'domínio que imita o Grok'], download:[60,'descarrega um executável'],
+    tracker:[45,'script de rastreio'], popup:[30,'pop-ups agressivos'], ads:[25,'redirecionamento publicitário'], http:[20,'ligação sem HTTPS'],
+    broken:[35,'link partido (404)'], redirect:[22,'encurtador que esconde o destino'], thin:[12,'pouco conteúdo legível'], ext:[8,'site externo'] };
+  function makeDeck(n){
+    const lib = shuffle(LIB.slice());
+    const rich = lib.find(p => p.min), risky = lib.find(p => (p.f || []).some(f => RISK[f] && RISK[f][0] >= 50));
+    const rest = lib.filter(p => p !== rich && p !== risky);
+    const deck = [rich, risky].filter(Boolean).concat(rest).slice(0, n);
+    const used = new Set();
+    while (deck.length < n) {
+      const f = FILL[Math.random()*FILL.length|0]; let k;
+      do { k = 10 + (Math.random()*900|0); } while (used.has(f.t + k)); used.add(f.t + k);
+      const t = f.t.replace('{n}', k);
+      deck.push({ ...f, t, u: t.startsWith('http') ? t : 'https://grok.x' + t, ti: f.ti.replace('{n}', k) });
+    }
+    return shuffle(deck);
+  }
+
+  // ---------- Classificação (pontuação 0–100) ----------
+  const TYPES = {
+    perfeito: { nome:'PERFEITO', cnome:'dourado', leg:'dourado · escolha perfeita' },
+    bom:      { nome:'BOM',      cnome:'verde',   leg:'verde · bom / seguro' },
+    medio:    { nome:'MÉDIO',    cnome:'azul',    leg:'azul · médio' },
+    mau:      { nome:'MAU',      cnome:'vermelho',leg:'vermelho · evitar' },
+  };
+  const cor = k => TH.cores[k];
+  const goalTokens = () => $('goal').value.toLowerCase().split(/[\s,]+/).filter(w => w.length > 1);
+
+  function analyse(l){
+    const p = l.page, flags = (p.f || []).slice();
+    if (p.u.startsWith('http://') && !flags.includes('http')) flags.push('http');
+    const hay = (p.t + ' ' + p.ti + ' ' + p.d + ' ' + p.k).toLowerCase();
+    const goal = goalTokens(), hits = goal.filter(w => hay.includes(w) || hay.includes(w.slice(0,5)));
+    let ctxBonus = 0;
+    links.forEach(o => { if (o !== l && Math.hypot(o.cx-l.cx, o.cy-l.cy) < 180) {
+      const h2 = (o.page.ti + ' ' + o.page.k).toLowerCase(); if (goal.some(w => h2.includes(w))) ctxBonus += 3; } });
+    ctxBonus = Math.min(9, ctxBonus);
+    const risk = flags.reduce((a,f) => a + (RISK[f] ? RISK[f][0] : 0), 0);
+    const raw = p.q + hits.length*12 + ctxBonus - risk;
+    const score = clamp(Math.round(raw * 0.72), 0, 100);     // 0–100
+    let t = 'medio';
+    if (risk >= 50 || score < 25) t = 'mau';
+    else if (hits.length >= 2 && score >= 72) t = 'perfeito';
+    else if (score >= 50) t = 'bom';
+    const host = p.u.replace(/^https?:\/\//,'').split('/')[0];
+    const pros = [], cons = flags.map(f => RISK[f] ? RISK[f][1] : f);
+    if (p.u.startsWith('https://')) pros.push('ligação segura (HTTPS)');
+    if (host === 'grok.x' || host === 'wiki.org') pros.push('fonte conhecida: ' + host);
+    if (hits.length) pros.push('relevante para «' + $('goal').value + '» (' + hits.length + ' termo' + (hits.length>1?'s':'') + ')');
+    if (ctxBonus) pros.push('rodeado de links do mesmo tema');
+    if (p.min) pros.push('~' + p.min + ' min de leitura');
+    return { t, score, hits, pros, cons, host };
+  }
+
+  const counts = Object.fromEntries(Object.keys(TYPES).map(k => [k,0]));
+  function renderLegend(){
+    $('legend').innerHTML = Object.entries(TYPES).map(([k,v]) =>
+      `<button type="button" class="chip${hidden.has(k) ? ' off' : ''}" data-t="${k}" style="--c:var(--c-${k})" aria-pressed="${!hidden.has(k)}">${k === 'perfeito' ? '★' : '●'} ${v.cnome} <b>${counts[k]}</b></button>`).join('')
+      + `<button type="button" class="chip all${hidden.size ? '' : ' off'}" data-t="todos">mostrar todos</button>`;
+    $('sum').innerHTML = Object.keys(TYPES).map(k => `<span style="--c:var(--c-${k})">${k === 'perfeito' ? '★' : '●'}${counts[k]}</span>`).join('');
+  }
+  const isHidden = l => !!(l.type && hidden.has(l.type));
+  function applyFilter(){ links.forEach(l => l.el.classList.toggle('off', isHidden(l))); renderLegend(); miniDirty = true; }
+  $('legend').addEventListener('click', e => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    const k = b.dataset.t;
+    if (k === 'todos') hidden.clear();
+    else if (hidden.has(k)) hidden.delete(k); else hidden.add(k);
+    applyFilter();
+    log(hidden.size ? 'filtro: a esconder ' + [...hidden].map(x => TYPES[x].cnome).join(', ') : 'filtro: todos visíveis');
+  });
+
+  function makeTag(l){
+    if (document.querySelectorAll('.tag').length >= 6) return null;
+    const tag = document.createElement('div'); tag.className = 'tag'; tag.style.setProperty('--c', 'var(--fg)');
+    tag.style.left = clamp(l.cx, 160, W - 160) + 'px'; tag.style.top = Math.max(60, l.cy - 18) + 'px';
+    page.appendChild(tag); return tag;
+  }
+  // ---------- Leitura de um link ----------
+  function finishRead(l, tag, re){
+    if (!links.includes(l)) { if (tag) tag.remove(); return; }   // o site mudou entretanto
+    const A = analyse(l), T = TYPES[A.t], p = l.page, c = cor(A.t);
+    if (l.type) l.el.classList.remove('t-' + l.type);
+    l.reading = false; l.type = A.t; l.score = A.score; l.A = A;
+    l.el.classList.remove('reading'); l.el.classList.add('t-' + A.t); l.el.dataset.sc = A.score;
+    l.el.classList.toggle('off', isHidden(l));
+    counts[A.t]++; renderLegend(); measureOne(l);
+    const curto = A.t === 'mau' ? '⚠ ' + (A.cons[0] || p.d) : p.d;
+    if (tag) { tag.style.setProperty('--c', 'var(--c-' + A.t + ')'); tag.innerHTML = `<b>${T.nome}</b>${esc(A.t === 'perfeito' ? p.ti : curto)}<span class="pts">${A.score}</span>`;
+      tag.style.animation = 'none'; void tag.offsetWidth; tag.style.animation = ''; setTimeout(() => tag.remove(), A.t === 'perfeito' ? 4000 : 2600); }
+    const row = document.createElement('div'); row.className = 'row'; row.style.setProperty('--c', 'var(--c-' + A.t + ')');
+    row.innerHTML = `<div class="hd"><i>● ${T.nome}</i><em title="${esc(p.u)}">${esc(p.ti)}</em></div><p>${esc(curto)} <span style="opacity:.7">· ${A.score}/100</span></p>`;
+    const rd = $('reads'); rd.prepend(row); while (rd.children.length > 6) rd.lastChild.remove();
+    // registo para o relatório
+    const rec = l.rec || (l.rec = { site:S.siteNo, ordem:++S.ordem, hora:new Date().toISOString() });
+    Object.assign(rec, { titulo:p.ti, texto:p.t, url:p.u, tipo:A.t, pontuacao:A.score, objetivo:$('goal').value, positivos:A.pros.slice(), alertas:A.cons.slice() });
+    if (!history.includes(rec)) history.push(rec);
+    if (!re) {
+      pulses.push({ x:l.cx, y:l.cy, r:0, c:hexRgb(c) });
+      burst(l.cx, l.cy, hexRgb(c), A.t === 'perfeito' ? 42 : A.t === 'mau' ? 16 : 20, A.t === 'perfeito' ? 3.4 : 2.4);
+      SND.play(A.t);
+      log((A.t === 'perfeito' ? '★ ' : '') + 'GET ' + p.u + '  → ' + T.nome + ' ' + A.score, A.t === 'perfeito' || A.t === 'mau');
+    }
+    if (A.t === 'perfeito') {
+      const g = document.createElement('div'); g.className = 'gold';
+      g.innerHTML = `<span class="sc">${A.score}/100</span><div class="ti">★ ${esc(p.ti)}</div><div class="url">${esc(p.u)}</div>
+        <p>${esc(p.rich || p.d)}</p><ul>${A.pros.map(x => '<li>' + esc(x) + '</li>').join('')}</ul>`;
+      const gs = $('golds'); gs.prepend(g); while (gs.children.length > 3) gs.lastChild.remove();
+      if (!re) { for (let k = 0; k < 3; k++) pulses.push({ x:l.cx, y:l.cy, r:-k*25, c:hexRgb(c) }); if (S.mode === 'busca') S.forceGrok = true; }
+    }
+    top5Dirty = true; miniDirty = true; updExpInfo();
+  }
+  function readLink(l){
+    if (l.reading) return;
+    l.reading = true; l.el.classList.add('reading');
+    const tag = makeTag(l);
+    if (tag) tag.innerHTML = `a ler destino… <span style="opacity:.6">${esc(l.page.u.replace(/^https?:\/\//,'').slice(0,34))}</span><div class="bar"></div>`;
+    if (S.mode === 'busca') S.pause = Math.max(S.pause, 42);
+    setTimeout(() => finishRead(l, tag), Math.max(240, 700 / S.speed));
+  }
+  function touchLink(l){   // marca como visitado, tece fios e lê o destino
+    if (l.visited) return false;
+    l.seen = true; l.visited = true; S.visCount = (S.visCount||0) + 1; l.visitedAt = S.t;
+    l.el.classList.remove('seen'); l.el.classList.add('visited');
+    // fios da teia: ao link anterior (fio de arrasto) e aos 2 vizinhos visitados mais próximos
+    const near = links.filter(o => o !== l && o.visited).map(o => [o, Math.hypot(o.cx-l.cx, o.cy-l.cy)]).filter(x => x[1] < 260).sort((a,b) => a[1]-b[1]).slice(0, 2);
+    near.forEach(([o]) => edges.push({ a:o, b:l, born:S.t, ph:Math.random()*TAU }));
+    if (S.anchor && S.anchor !== l && !near.some(x => x[0] === S.anchor) && links.includes(S.anchor)) edges.push({ a:S.anchor, b:l, born:S.t, ph:Math.random()*TAU, drag:true });
+    S.anchor = l;
+    readLink(l);
+    pulses.push({ x:l.cx, y:l.cy, r:0 }); miniDirty = true; return true;
+  }
+  function showInfo(l){    // toque num link já lido: volta a mostrar a classificação
+    if (!l.type) return;
+    const A = analyse(l), T = TYPES[A.t], tag = makeTag(l); if (!tag) return;
+    tag.style.setProperty('--c', 'var(--c-' + A.t + ')');
+    tag.innerHTML = `<b>${T.nome}</b>${esc(A.t === 'perfeito' ? l.page.ti : (A.t === 'mau' ? '⚠ ' + (A.cons[0] || l.page.d) : l.page.d))}<span class="pts">${A.score}</span>`;
+    setTimeout(() => tag.remove(), 2600); pulses.push({ x:l.cx, y:l.cy, r:0, c:hexRgb(cor(A.t)) });
+  }
+  function reclassifyAll(){
+    Object.keys(counts).forEach(k => counts[k] = 0); $('reads').innerHTML = ''; $('golds').innerHTML = '';
+    links.filter(l => l.visited && l.type).forEach(l => finishRead(l, null, true));
+    renderLegend();
+    log('objetivo alterado: reclassificados ' + links.filter(l => l.visited).length + ' links', true);
+  }
+  $('goal').addEventListener('change', reclassifyAll);
+  $('goal').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') e.target.blur(); });
+
+  // ---------- Top 5 ----------
+  function renderTop5(){
+    top5Dirty = false;
+    const best = links.filter(l => l.type).sort((a, b) => b.score - a.score).slice(0, 5);
+    $('top5').innerHTML = best.map((l, i) => `<li><button type="button" data-id="${l.id}" style="--c:var(--c-${l.type})">
+      <span class="rk">${i+1}.</span><span class="nm">${l.type === 'perfeito' ? '★ ' : ''}${esc(l.page.ti)}</span><span class="pt">${l.score}</span>
+      <span class="br"><i style="width:${l.score}%"></i></span></button></li>`).join('');
+  }
+  $('top5').addEventListener('click', e => {
+    const b = e.target.closest('button[data-id]'); if (!b) return;
+    const l = links.find(x => x.id === +b.dataset.id); if (!l) return;
+    l.el.classList.add('flash'); setTimeout(() => l.el.classList.remove('flash'), 1200);
+    for (let k = 0; k < 2; k++) pulses.push({ x:l.cx, y:l.cy, r:-k*30, c:hexRgb(cor(l.type)) });
+    showInfo(l);
+  });
+
+  // ---------- Relatório (JSON / CSV) ----------
+  function updExpInfo(){ setTxt('expInfo', history.length + ' link' + (history.length === 1 ? '' : 's') + ' no relatório · ' + S.siteNo + ' site' + (S.siteNo === 1 ? '' : 's')); }
+  function reportRows(){
+    return history.map(r => ({ site:r.site, ordem:r.ordem, titulo:r.titulo, url:r.url, classificacao:TYPES[r.tipo].nome, cor:TYPES[r.tipo].cnome,
+      pontuacao:r.pontuacao, objetivo:r.objetivo, positivos:r.positivos.join('; '), alertas:r.alertas.join('; '), hora:r.hora }));
+  }
+  function buildReport(){
+    const rows = reportRows(), cont = { dourado:0, verde:0, azul:0, vermelho:0 };
+    rows.forEach(r => cont[r.cor]++);
+    const json = JSON.stringify({ app:'Grok Crawler v2', gerado:new Date().toISOString(), objetivo:$('goal').value, sites:S.siteNo,
+      total:rows.length, contagem:cont, media: rows.length ? Math.round(rows.reduce((a, r) => a + r.pontuacao, 0) / rows.length) : 0, links:rows }, null, 2);
+    const cols = ['site','ordem','titulo','url','classificacao','cor','pontuacao','objetivo','positivos','alertas','hora'];
+    const q = v => { const s = String(v == null ? '' : v); return /[";\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const csv = '\ufeff' + [cols.join(';')].concat(rows.map(r => cols.map(c => q(r[c])).join(';'))).join('\r\n');
+    return { json, csv, n:rows.length };
+  }
+  function download(name, mime, text){
+    const blob = new Blob([text], { type:mime }), url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = name; a.rel = 'noopener'; a.style.display = 'none';
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
+  }
+  function exportar(kind){
+    const R = buildReport();
+    if (!R.n) { log('relatório vazio: ainda não há links lidos', true); return; }
+    const d = new Date(), pad = n => String(n).padStart(2, '0');
+    const stamp = d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes());
+    if (kind === 'csv') download('grok-crawler-relatorio-' + stamp + '.csv', 'text/csv;charset=utf-8', R.csv);
+    else download('grok-crawler-relatorio-' + stamp + '.json', 'application/json', R.json);
+    log('⤓ relatório ' + kind.toUpperCase() + ' exportado (' + R.n + ' links)', true);
+  }
+  $('bJson').addEventListener('click', () => exportar('json'));
+  $('bCsv').addEventListener('click', () => exportar('csv'));
+
+  // ---------- Registo ----------
+  function log(msg, hot){ const d = document.createElement('div'); d.textContent = msg; if (hot) d.className = 'hot';
+    const L = $('log'); L.prepend(d); while (L.children.length > 8) L.lastChild.remove(); }
+
+  // ---------- Aranha ----------
+  const L1 = 19, L2 = 25;    // fémur / tíbia (IK de dois segmentos)
+  const legs = Array.from({length:8}, (_,i) => {
+    const side = i<4 ? -1 : 1, k = i%4;
+    return { side, k, base:(k-1.5)*0.47, foot:{x:S.x,y:S.y}, sx:0, sy:0, tx:0, ty:0, p:1, lift:0, phase:(k%2) ^ (side>0 ? 1 : 0) };
+  });
+
+  // ---------- Partículas ----------
+  function burst(x, y, rgb, n, sp){
+    if (RM) n = Math.min(4, n >> 2);
+    for (let i = 0; i < n && particles.length < 500; i++) {
+      const a = Math.random()*TAU, v = (.4 + Math.random()) * sp;
+      particles.push({ x, y, vx:Math.cos(a)*v, vy:Math.sin(a)*v - .4, life:0, max:36 + Math.random()*34, c:rgb, s:1 + Math.random()*2 });
+    }
+  }
+
+  // ---------- Entrada: Pointer Events (caneta / dedo / rato) ----------
+  const P = { x:W/2, y:H/2, px:W/2, py:H/2, t:0, down:false, downT:0, dragged:false, type:'—', id:null,
+    pressure:0, ps:0, hoverT:0, az:null, alt:null, downX:0, downY:0, downLink:null };
+  let penSeenT = -1e9;                                       // última vez que a caneta deu sinal
+  const penActive = () => P.down && P.type === 'pen' || performance.now() - penSeenT < 1200;
+  const touches = new Map();                                 // dedos no palco (para pinça / toque a dois)
+  let pinch = null, twoTap = null;
+  const isUI = el => !!(el && el.closest && el.closest('#top,#hint,#dock,#panel,#intro'));
+
+  function setRBase(v, show){
+    const old = S.Rbase; S.Rbase = clamp(Math.round(v), R_MIN, R_MAX);
+    if (show !== false) S.rFlash = 60;
+    if (S.Rbase !== old && !RM && (!ripples.length || ripples[ripples.length-1].t > .25)) { ripples.push({ r0:S.R, r1:S.Rbase, t:0 }); SND.play('raio'); }
+  }
+  function linkAt(x, y){       // alvo generoso (≥44px) para toques
+    let best = null, bd = Infinity;
+    links.forEach(l => { const b = l.box; if (!b) return;
+      const dx = Math.max(b.left - 10 - x, 0, x - b.right - 10), dy = Math.max(b.top - 12 - y, 0, y - b.bottom - 12);
+      const d = Math.hypot(dx, dy) + Math.hypot(l.cx - x, l.cy - y)*.001;
+      if (dx === 0 && dy === 0 && d < bd) { bd = d; best = l; } });
+    return best;
+  }
+  function readTilt(e){
+    if (e.pointerType !== 'pen') { P.az = null; P.alt = null; return; }
+    if (typeof e.azimuthAngle === 'number' && typeof e.altitudeAngle === 'number' && e.altitudeAngle < Math.PI/2 - .02) {
+      P.az = e.azimuthAngle; P.alt = e.altitudeAngle;
+    } else if (e.tiltX || e.tiltY) {
+      const tx = e.tiltX*Math.PI/180, ty = e.tiltY*Math.PI/180;
+      P.az = Math.atan2(Math.tan(ty), Math.tan(tx));
+      P.alt = Math.PI/2 - Math.min(Math.PI/2, Math.hypot(tx, ty));
+    } else { P.az = null; P.alt = null; }
+  }
+  function movePointer(e){
+    const nx = e.clientX, ny = e.clientY;
+    if (P.down && Math.hypot(nx - P.downX, ny - P.downY) > 8) P.dragged = true;
+    if (nx !== P.x || ny !== P.y || e.pointerType === 'pen') P.t = performance.now();
+    P.x = nx; P.y = ny; P.type = e.pointerType || 'mouse';
+    if (e.pointerType === 'pen') { penSeenT = performance.now(); P.pressure = P.down ? (e.pressure || 0.5) : 0; if (!P.down) P.hoverT = performance.now(); readTilt(e); }
+    else { P.pressure = 0; P.az = null; }
+  }
+
+  addEventListener('pointerdown', e => {
+    if (isUI(e.target)) return;
+    const type = e.pointerType || 'mouse';
+    if (type === 'pen') penSeenT = performance.now();
+    if (type === 'touch') {
+      if (penActive()) return;                               // rejeição da palma: caneta em uso → ignora dedos no palco
+      touches.set(e.pointerId, { x:e.clientX, y:e.clientY, x0:e.clientX, y0:e.clientY, t0:performance.now() });
+      if (touches.size === 2) {                              // começa pinça / toque a dois dedos
+        const [a, b] = [...touches.values()];
+        pinch = { d0: Math.hypot(a.x-b.x, a.y-b.y) || 1, r0: S.Rbase };
+        twoTap = { t0: performance.now(), maxMove: 0 };
+        if (P.down && P.type === 'touch') { P.down = false; P.id = null; }
+        return;
+      }
+      if (touches.size > 2) return;
+    }
+    grok._down = e.target === grok ? { type, t: performance.now() } : null;
+    if (P.down && P.id !== e.pointerId) return;              // já há um ponteiro principal
+    P.down = type !== 'mouse' || e.button === 0; P.id = e.pointerId; P.downT = performance.now(); P.dragged = false;
+    P.downX = e.clientX; P.downY = e.clientY; P.downLink = e.target === grok ? null : linkAt(e.clientX, e.clientY);
+    movePointer(e);
+    if (e.target !== grok) { try { page.setPointerCapture?.(e.pointerId); } catch(_){} }
+    if (P.downLink) { P.downLink.el.classList.add('tapped'); }
+  });
+  addEventListener('pointermove', e => {
+    const type = e.pointerType || 'mouse';
+    if (type === 'touch') {
+      const tp = touches.get(e.pointerId);
+      if (!tp) return;                                       // dedo rejeitado ou na interface
+      tp.x = e.clientX; tp.y = e.clientY;
+      if (touches.size === 2 && pinch) {
+        const [a, b] = [...touches.values()], d = Math.hypot(a.x-b.x, a.y-b.y);
+        setRBase(pinch.r0 * d / pinch.d0);
+        if (twoTap) twoTap.maxMove = Math.max(twoTap.maxMove, Math.hypot(tp.x-tp.x0, tp.y-tp.y0));
+        return;
+      }
+      if (P.id !== e.pointerId) return;
+    } else if (type === 'mouse' || type === 'pen') {
+      if (P.down && P.id !== e.pointerId) return;
+      if (isUI(e.target) && !P.down) return;                 // a passar por cima dos botões
+    }
+    if (pinch) return;
+    movePointer(e);
+  }, { passive:true });
+  function endPointer(e, cancelled){
+    const type = e.pointerType || 'mouse';
+    if (type === 'touch' && touches.has(e.pointerId)) {
+      touches.delete(e.pointerId);
+      if (pinch) {
+        if (touches.size < 2) {
+          // toque rápido com dois dedos, sem mexer → alterna modo
+          if (!cancelled && twoTap && performance.now() - twoTap.t0 < 350 && twoTap.maxMove < 18) {
+            setMode(S.mode === 'busca' ? 'manual' : 'busca'); log('(toque com dois dedos)');
+          } else log('raio ajustado por pinça: ' + S.Rbase + 'px');
+          twoTap = null;
+        }
+        if (touches.size === 0) pinch = null;
+        return;
+      }
+    }
+    if (P.id !== e.pointerId) return;
+    const l = P.downLink;
+    if (l) l.el.classList.remove('tapped');
+    const isTap = !cancelled && P.down && !P.dragged && performance.now() - P.downT < 450;
+    if (isTap && l && linkAt(e.clientX, e.clientY) === l) tapLink(l);
+    P.down = false; P.id = null; P.downLink = null; P.pressure = 0;
+    if (type === 'pen') { penSeenT = performance.now(); P.hoverT = performance.now(); }
+  }
+  addEventListener('pointerup', e => endPointer(e, false));
+  addEventListener('pointercancel', e => endPointer(e, true));
+  addEventListener('pointerleave', e => { if (e.pointerType === 'pen' && !P.down) P.hoverT = 0; });
+
+  function tapLink(l){
+    if (S.mode === 'manual') {
+      if (!l.visited) { touchLink(l); updHud(); log('toque direto: ' + l.page.u); }
+      else showInfo(l);
+    } else {
+      if (!l.visited) { S.target = { x:l.cx, y:l.cy, kind:'link', link:l }; S.pause = 0;
+        if (!l.seen) { l.seen = true; l.el.classList.add('seen'); updHud(); }
+        pulses.push({ x:l.cx, y:l.cy, r:0, c:TH.man }); log('→ alvo escolhido: ' + l.page.u, true); }
+      else showInfo(l);
+    }
+  }
+
+  // roda do rato / trackpad
+  addEventListener('wheel', e => { if (e.target.closest && e.target.closest('#panel,#intro')) return; e.preventDefault();
+    setRBase(S.Rbase - Math.sign(e.deltaY)*15); }, { passive:false });
+
+  // bloquear gestos do iOS (zoom, duplo toque, lupa, menu de toque longo) fora do painel
+  ['gesturestart','gesturechange','gestureend'].forEach(ev => document.addEventListener(ev, e => e.preventDefault(), { passive:false }));
+  document.addEventListener('touchmove', e => { if (!(e.target.closest && e.target.closest('#panelBody,#introCard,input[type=range]'))) e.preventDefault(); }, { passive:false });
+  document.addEventListener('touchstart', e => { if (e.touches.length > 1 && !isUI(e.target)) e.preventDefault(); }, { passive:false });
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', e => { const now = performance.now();
+    if (now - lastTouchEnd < 300 && !isUI(e.target) && e.target !== grok) e.preventDefault(); lastTouchEnd = now; }, { passive:false });
+  document.addEventListener('dblclick', e => e.preventDefault());
+  document.addEventListener('contextmenu', e => { if (e.target.id !== 'goal') e.preventDefault(); });
+  document.addEventListener('selectstart', e => { if (e.target.id !== 'goal') e.preventDefault(); });
+  document.addEventListener('dragstart', e => e.preventDefault());
+
+  // ---------- Busca automática ----------
+  function density(l, pool){ let n=0; pool.forEach(o => { if (o!==l && Math.hypot(o.cx-l.cx,o.cy-l.cy) < 180) n++; }); return n; }
+  function grokTarget(){ const r = grok.getBoundingClientRect(); return { x:r.left+r.width/2, y:r.top+r.height/2, kind:'grok' }; }
+  function pickBusca(){
+    if (S.rebuilding) return null;
+    const pool = links.filter(l => !l.visited);
+    if (!pool.length) {
+      if (!S.finalGrok) { S.finalGrok = true; log('» todos os links tocados — a reportar ao Grok', true); return grokTarget(); }
+      S.rebuilding = true; log('✓ busca completa — novo site a caminho', true); setTxt('hState', 'busca completa');
+      setTimeout(() => resetSite('novo site carregado (site ' + (S.siteNo + 1) + ')'), 1200); S.pause = 90; return null;
+    }
+    const vis = S.visCount || 0;
+    if (S.forceGrok) { S.forceGrok = false; log('» a levar a escolha perfeita ao Grok', true); return grokTarget(); }
+    if (vis > 0 && vis % 7 === 0 && S.lastGrokAt !== vis) { S.lastGrokAt = vis; return grokTarget(); }
+    let best = null, bd = Infinity;
+    pool.forEach(l => { const d = Math.hypot(l.cx-S.x, l.cy-S.y); if (d < bd) { bd = d; best = l; } });
+    if (bd > S.R * 1.6) {
+      let bs = -Infinity;
+      pool.forEach(l => { const d = Math.hypot(l.cx-S.x, l.cy-S.y); const sc = density(l,pool)*90 - d; if (sc > bs) { bs = sc; best = l; } });
+      log('→ zona densa: ' + (density(best,pool)+1) + ' links por tocar'); setTxt('hState', 'a mudar de zona');
+    }
+    if (!best.seen) { best.seen = true; best.el.classList.add('seen'); updHud(); }
+    return { x:best.cx, y:best.cy, kind:'link', link:best };
+  }
+
+  function pressGrok(){
+    grok.classList.add('pressed'); S.grokCount++; setTxt('hGrok', String(S.grokCount));
+    log('» POST /x/grok  200 OK', true); pulses.push({ x:S.x, y:S.y, r:0, c:TH.hot });
+    const g = grokTarget(); burst(g.x, g.y, TH.hot, 24, 3); SND.play('grok');
+    setTimeout(() => grok.classList.remove('pressed'), 350);
+  }
+  grok.addEventListener('click', e => {
+    e.preventDefault();
+    const d = grok._down; grok._down = null;
+    if (d && d.type === 'touch' && performance.now() - d.t < 800 && penActive()) return;   // palma em cima do botão
+    pressGrok(); log('(toque humano no Grok)'); setMode(S.mode === 'busca' ? 'manual' : 'busca');
+  });
+
+  function updHud(){ setTxt('hSeen', String(links.filter(l=>l.seen).length)); setTxt('hVis', String(links.filter(l=>l.visited).length)); }
+  const IN_NAMES = { pen:'✎ Apple Pencil', touch:'☝ dedo', mouse:'🖱 rato', '—':'—' };
+
+  // ---------- Simulação (passo fixo de 1/60 s) ----------
+  function step(){
+    S.t++;
+    const now = performance.now();
+    const held = P.down && (P.dragged || now - P.downT > 180);                 // toque rápido = só lê o link tocado
+    const moving = !pinch && (held || (P.type === 'mouse' && now - P.t < 120)); // regra dos 120 ms + contacto
+    const hovering = !pinch && P.type === 'pen' && !P.down && P.hoverT && now - P.hoverT < 500;
+    P.ps += ((P.down && P.type === 'pen' ? P.pressure : 0) - P.ps) * .2;       // pressão suavizada
+
+    // raio: base (pinça/botões/roda) modulada pela pressão da caneta no modo manual
+    let rT = S.Rbase;
+    if (S.mode === 'manual' && P.type === 'pen' && P.down) rT = clamp(S.Rbase * (0.4 + 1.4*P.pressure), R_MIN, R_MAX);
+    S.R += (rT - S.R) * .16; if (Math.abs(rT - S.R) < .3) S.R = rT;
+    S.R = clamp(S.R, R_MIN, R_MAX);
+
+    if (S.mode === 'manual') {
+      // centro = posição exata da caneta/dedo/rato (precisão), a aranha só suaviza a orientação
+      S.vx = clamp(P.x - P.px, -6, 6); S.vy = clamp(P.y - P.py, -6, 6);
+      S.x = P.x; S.y = P.y; P.px = P.x; P.py = P.y; S.target = null;
+      setTxt('hState', pinch ? 'a ajustar o raio (pinça)' : moving ? (P.type === 'pen' ? 'a varrer com a caneta' : P.type === 'touch' ? 'a varrer com o dedo' : 'a varrer (rato)')
+        : hovering ? 'caneta a pairar — pré-visualização' : 'parado — arrasta a caneta ou o dedo');
+    }
+    else if (S.pause > 0) { S.pause -= S.speed; S.vx *= .86; S.vy *= .86; }
+    else {
+      if (!S.target) S.target = pickBusca();
+      if (S.target) {
+        if (S.target.link) { S.target.x = S.target.link.cx; S.target.y = S.target.link.cy; }
+        const dx = S.target.x - S.x, dy = S.target.y - S.y, d = Math.hypot(dx,dy), maxSp = 3.4 * S.speed;
+        const arrive = Math.max(6, maxSp * 1.6);
+        if (d > arrive) {
+          // mola com chegada suave: abranda perto do alvo
+          const sp = Math.min(maxSp, .5 + d * .05);
+          S.vx += (dx/d*sp - S.vx) * .085; S.vy += (dy/d*sp - S.vy) * .085;
+          setTxt('hState', S.target.kind === 'grok' ? 'a caminho do Grok' : 'a seguir link');
+        } else {
+          if (S.target.kind === 'link') { const l = S.target.link; if (touchLink(l)) { S.pause = Math.max(S.pause, 12); setTxt('hState', 'link tocado'); } }
+          if (S.target.kind === 'grok') { pressGrok(); S.pause = 45; setTxt('hState', 'a interagir'); }
+          S.target = null; updHud();
+        }
+      }
+    }
+    if (S.mode !== 'manual') { S.x += S.vx; S.y += S.vy; }
+    const spd = Math.hypot(S.vx, S.vy);
+    if (spd > .25) S.angT = Math.atan2(S.vy, S.vx);
+    let da = S.angT - S.ang; da = Math.atan2(Math.sin(da), Math.cos(da)); S.ang += da * .16;
+    S.spd = spd;
+
+    // rasto
+    if (!RM && S.t % 2 === 0 && spd > .4) { S.trail.push({ x:S.x, y:S.y, t:S.t }); if (S.trail.length > 46) S.trail.shift(); }
+    while (S.trail.length && S.t - S.trail[0].t > 92) S.trail.shift();
+
+    // deteção no raio
+    let newly = 0; const fresh = [];
+    if (S.mode === 'manual') {
+      if (moving) {
+        links.forEach(l => { if (!l.visited && Math.hypot(l.cx-S.x, l.cy-S.y) < S.R && touchLink(l)) newly++; });
+        const g = grok.getBoundingClientRect(), inG = Math.hypot(g.left+g.width/2-S.x, g.top+g.height/2-S.y) < S.R;
+        if (inG && !S.grokIn) pressGrok();
+        S.grokIn = inG;
+      } else if (hovering) {
+        // caneta a pairar: só deteta (pré-visualização), não toca
+        links.forEach(l => { if (!l.seen && !l.visited && Math.hypot(l.cx-S.x, l.cy-S.y) < S.R) { l.seen = true; l.el.classList.add('seen'); newly++; fresh.push(l); } });
+      }
+      if (newly) updHud();
+    } else {
+      links.forEach(l => { if (!l.seen && !l.visited && Math.hypot(l.cx-S.x, l.cy-S.y) < S.R) { l.seen = true; l.el.classList.add('seen'); newly++; fresh.push(l); } });
+      if (newly) { updHud(); if (newly > 1) log('+' + newly + ' links na fila'); }
+    }
+    fresh.forEach(l => { burst(l.cx, l.cy, TH.acc, 6, 1.4); }); if (fresh.length) { SND.play('seen'); miniDirty = true; }
+
+    // varrimento: roda sozinho; com a caneta inclinada aponta para onde ela se inclina
+    const tilted = S.mode === 'manual' && P.type === 'pen' && P.az !== null && (P.down || hovering);
+    S.tiltOn = tilted;
+    if (tilted) { const tgt = P.az + Math.PI + Math.sin(S.t*.08)*.25; let d2 = tgt - S.sweepAng; d2 = Math.atan2(Math.sin(d2), Math.cos(d2)); S.sweepAng += d2*.25; }
+    else S.sweepAng += .04;
+    S.sonar = (S.sonar + 1) % 130;
+
+    // HUD
+    setTxt('hR', String(Math.round(S.R))); setTxt('hIn', IN_NAMES[P.type] || P.type);
+    setTxt('hP', P.type === 'pen' ? (P.down ? Math.round(P.pressure*100) + '%' : 'a pairar') : P.type === 'touch' ? 'raio fixo' : '—');
+    if (S.rFlash > 0) S.rFlash--;
+
+    // patas: passos com elevação, grupos alternados (tetrápode)
+    const gaitRate = 8 / clamp(.6 + spd*.25, .6, 2.2);
+    const gaitPhase = ((S.t / gaitRate) | 0) % 2;
+    legs.forEach(g => {
+      const a = S.ang + g.side*(Math.PI/2) - g.base*g.side;
+      const reach = 36 + Math.abs(g.k - 1.5) * 3;
+      const hx = S.x + Math.cos(a)*reach + S.vx*9, hy = S.y + Math.sin(a)*reach + S.vy*9;
+      const dist = Math.hypot(hx-g.foot.x, hy-g.foot.y);
+      if (dist > 240) { g.foot.x = hx; g.foot.y = hy; g.p = 1; g.lift = 0; }   // saltos grandes (caneta levantada e pousada noutro sítio)
+      else if (g.p >= 1 && dist > 18 && (gaitPhase === g.phase || dist > 44)) { g.sx = g.foot.x; g.sy = g.foot.y; g.tx = hx; g.ty = hy; g.p = 0; }
+      if (g.p < 1) {
+        g.tx += (hx - g.tx) * .3; g.ty += (hy - g.ty) * .3;
+        g.p = Math.min(1, g.p + .13 * clamp(.8 + spd*.15, .8, 2));
+        const e = ease(g.p); g.foot.x = lerp(g.sx, g.tx, e); g.foot.y = lerp(g.sy, g.ty, e);
+        g.lift = Math.sin(g.p * Math.PI) * (5 + Math.min(6, dist*.12));
+      } else g.lift = 0;
+    });
+
+    // partículas, pulsos, ondas
+    for (let i = particles.length-1; i >= 0; i--) { const p = particles[i];
+      p.x += p.vx; p.y += p.vy; p.vx *= .955; p.vy = p.vy*.955 + .035; p.life++; if (p.life > p.max) particles.splice(i,1); }
+    for (let i = pulses.length-1; i >= 0; i--) { const p = pulses[i]; p.r += 3; if (p.r > 120) pulses.splice(i,1); }
+    for (let i = ripples.length-1; i >= 0; i--) { const r = ripples[i]; r.t += .035; if (r.t >= 1) ripples.splice(i,1); }
+  }
+
+  // ---------- Desenho ----------
+  function arc(x, y, r, a0, a1){ ctx.arc(x, y, Math.max(0, r), a0, a1); }
+  function drawBg(){
+    bgDirty = false;
+    const t = S.t, px = S.x - W/2, py = S.y - H/2;
+    const g = bctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, TH.bg0); g.addColorStop(1, TH.bg1);
+    bctx.globalAlpha = 1; bctx.fillStyle = g; bctx.fillRect(0, 0, W, H);
+    const mv = RM ? 0 : 1, M = Math.max(W, H);
+    for (let i = 0; i < 2; i++) {
+      const cx = W*(i ? .78 : .22) + mv*Math.sin(t*.0021 + i*2)*W*.06 - px*.02*(i+1);
+      const cy = H*(i ? .72 : .28) + mv*Math.cos(t*.0017 + i)*H*.05 - py*.02*(i+1), r = M*.6;
+      const rg = bctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      rg.addColorStop(0, `rgba(${TH.neb[i]},${TH.nebA})`); rg.addColorStop(1, `rgba(${TH.neb[i]},0)`);
+      bctx.fillStyle = rg; bctx.fillRect(0, 0, W, H);
+    }
+    const K = [.012, .03, .06];
+    bctx.fillStyle = `rgb(${TH.star})`;
+    for (const s of stars) {
+      let x = (s.x - px*K[s.z] - mv*t*.025*(s.z+1)) % W; if (x < 0) x += W;
+      let y = (s.y - py*K[s.z]) % H; if (y < 0) y += H;
+      bctx.globalAlpha = TH.starA * (RM ? .55 : .3 + .45*(.5 + .5*Math.sin(t*s.tw + s.ph))) * (.45 + s.z*.28);
+      const sz = s.s * (1 + s.z*.45); bctx.fillRect(x, y, sz, sz);
+    }
+    bctx.globalAlpha = 1;
+  }
+
+  function legIK(g, hx, hy, fx, fy){
+    const dx = fx - hx, dy = fy - hy, dRaw = Math.hypot(dx, dy) || .001;
+    const d = clamp(dRaw, Math.abs(L1 - L2) + 1, L1 + L2 - .5), a = Math.atan2(dy, dx);
+    const th = Math.acos(clamp((L1*L1 + d*d - L2*L2) / (2*L1*d), -1, 1));
+    const k1x = hx + Math.cos(a - th)*L1, k1y = hy + Math.sin(a - th)*L1, k2x = hx + Math.cos(a + th)*L1, k2y = hy + Math.sin(a + th)*L1;
+    // patas da frente dobram para a frente, as de trás para trás
+    const fwd = g.k < 2 ? 1 : -1, hxv = Math.cos(S.ang), hyv = Math.sin(S.ang);
+    return ((k1x - hx)*hxv + (k1y - hy)*hyv) * fwd > ((k2x - hx)*hxv + (k2y - hy)*hyv) * fwd ? [k1x, k1y] : [k2x, k2y];
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const man = S.mode === 'manual', rc = man ? TH.man : TH.acc, R = Math.max(1, S.R);
+    const now = performance.now();
+    const ghost = man && P.type === 'pen' && !P.down && P.hoverT && now - P.hoverT < 500;
+    const idle = man && !P.down && !ghost && P.type !== 'mouse';
+    const breathe = RM ? 0 : Math.sin(S.t * .05);
+    ctx.lineCap = 'round';
+
+    // teia (grafo) — fios brilhantes que esmorecem com a idade
+    for (let pass = 0; pass < 2; pass++) {
+      ctx.globalCompositeOperation = pass ? 'source-over' : TH.add;
+      ctx.lineWidth = pass ? 1 : 4.5;
+      for (const e of edges) {
+        if (isHidden(e.a) || isHidden(e.b)) continue;
+        const age = S.t - e.born, grow = RM ? 1 : clamp(age / 22, 0, 1), fade = .3 + .7*Math.exp(-age / 540);
+        const ax = e.a.cx, ay = e.a.cy, bx = lerp(ax, e.b.cx, grow), by = lerp(ay, e.b.cy, grow);
+        const d = Math.hypot(bx - ax, by - ay), sag = 5 + d*.05 + (RM ? 0 : Math.sin(S.t*.02 + e.ph)*2);
+        ctx.strokeStyle = e.a.type && e.a.type === e.b.type ? cor(e.a.type) : TH.thread;
+        ctx.globalAlpha = pass ? (e.drag ? .7 : .55) * fade : .13 * fade;
+        ctx.beginPath(); ctx.moveTo(ax, ay); ctx.quadraticCurveTo((ax+bx)/2, (ay+by)/2 + sag, bx, by); ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+
+    // auréola das escolhas perfeitas (anel elíptico + raios a rodar)
+    const gc = hexRgb(cor('perfeito'));
+    links.forEach(l => {
+      if (l.type !== 'perfeito' || isHidden(l) || !l.box) return;
+      const rx = l.box.width/2 + 26, ry = l.box.height/2 + 20, wob = RM ? 0 : Math.sin(S.t*.05 + l.id)*.06;
+      ctx.save(); ctx.translate(l.cx, l.cy); ctx.scale(1, ry/rx);
+      ctx.globalCompositeOperation = TH.add;
+      const hg = ctx.createRadialGradient(0, 0, rx*.55, 0, 0, rx*(1.12 + wob));
+      hg.addColorStop(0, `rgba(${gc},0)`); hg.addColorStop(.45, `rgba(${gc},.22)`); hg.addColorStop(1, `rgba(${gc},0)`);
+      ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(0, 0, Math.max(0, rx*(1.12 + wob)), 0, TAU); ctx.fill();
+      if (!RM) {
+        ctx.strokeStyle = `rgba(${gc},.38)`; ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) { const a = S.t*.01 + i*TAU/10, o = rx*(1.02 + .1*Math.sin(S.t*.07 + i*1.7));
+          ctx.moveTo(Math.cos(a)*rx*.86, Math.sin(a)*rx*.86); ctx.lineTo(Math.cos(a)*o, Math.sin(a)*o); }
+        ctx.stroke();
+      }
+      ctx.restore();
+    });
+
+    // rasto
+    if (S.trail.length) {
+      ctx.fillStyle = `rgb(${rc})`;
+      for (const p of S.trail) { const a = 1 - (S.t - p.t)/92; ctx.globalAlpha = a*a*.4; ctx.fillRect(p.x - 1.2, p.y - 1.2, 2.4, 2.4); }
+      ctx.globalAlpha = 1;
+    }
+
+    // raio de deteção (pulsa suavemente) + sonar + ondas de mudança de raio
+    const grd = ctx.createRadialGradient(S.x,S.y,0,S.x,S.y,R);
+    grd.addColorStop(0, `rgba(${rc},${ghost || idle ? .04 : .08 + P.ps*.08 + breathe*.015})`); grd.addColorStop(1, `rgba(${rc},0)`);
+    ctx.fillStyle = grd; ctx.beginPath(); arc(S.x,S.y,R,0,TAU); ctx.fill();
+    ctx.setLineDash(ghost ? [8,8] : [3,6]); ctx.strokeStyle = `rgba(${rc},${ghost ? .5 : .33 + breathe*.1})`; ctx.lineWidth = 1 + P.ps*2.5;
+    ctx.beginPath(); arc(S.x,S.y,R,S.t*.01,S.t*.01+TAU); ctx.stroke(); ctx.setLineDash([]);
+    if (!RM && !ghost && !idle) { const k = S.sonar/130; ctx.strokeStyle = `rgba(${rc},${(1-k)*.28})`; ctx.lineWidth = 1.2; ctx.beginPath(); arc(S.x, S.y, R*ease(k), 0, TAU); ctx.stroke(); }
+    ripples.forEach(r => { const e = ease(r.t), rr = lerp(r.r0, r.r1, e) + (r.r1 >= r.r0 ? 1 : -1) * r.t * 26;
+      ctx.strokeStyle = `rgba(${rc},${(1 - r.t)*.7})`; ctx.lineWidth = .5 + 2.5*(1 - r.t); ctx.beginPath(); arc(S.x, S.y, rr, 0, TAU); ctx.stroke(); });
+    if (ghost) { ctx.fillStyle = `rgba(${TH.man},.8)`; ctx.font = '12px ui-monospace, Menlo, monospace'; ctx.textAlign = 'center';
+      ctx.fillText('a pairar · pousa a caneta para tocar', S.x, S.y - R - 8); }
+    if (man && P.type === 'pen' && P.down && Math.abs(S.Rbase - R) > 4) {
+      ctx.strokeStyle = `rgba(${TH.star},.18)`; ctx.setLineDash([2,8]); ctx.lineWidth = 1; ctx.beginPath(); arc(S.x,S.y,S.Rbase,0,TAU); ctx.stroke(); ctx.setLineDash([]);
+    }
+    if (man && P.type === 'pen' && (P.down || P.ps > .02)) {
+      ctx.strokeStyle = `rgba(${TH.star},.15)`; ctx.lineWidth = 4; ctx.beginPath(); arc(S.x,S.y,30,0,TAU); ctx.stroke();
+      ctx.strokeStyle = `rgb(${TH.man})`; ctx.beginPath(); arc(S.x,S.y,30,-Math.PI/2,-Math.PI/2 + TAU*clamp(P.ps,0,1)); ctx.stroke();
+      ctx.fillStyle = `rgb(${TH.man})`; ctx.font = '12px ui-monospace, Menlo, monospace'; ctx.textAlign = 'center';
+      ctx.fillText('pressão ' + Math.round(P.ps*100) + '% · raio ' + Math.round(R) + 'px', S.x, S.y - R - 8);
+    } else if (S.rFlash > 0) {
+      ctx.globalAlpha = Math.min(1, S.rFlash/20); ctx.fillStyle = `rgb(${rc})`; ctx.font = '13px ui-monospace, Menlo, monospace'; ctx.textAlign = 'center';
+      ctx.fillText('raio ' + Math.round(S.Rbase) + 'px', S.x, S.y - R - 8); ctx.globalAlpha = 1;
+    }
+    // varrimento (cone quando a caneta está inclinada)
+    const sw = S.sweepAng;
+    if (S.tiltOn) {
+      const tiltK = P.alt === null ? .5 : clamp(1 - P.alt/(Math.PI/2), .15, 1), spread = .12 + tiltK*.35;
+      ctx.fillStyle = `rgba(${rc},.08)`; ctx.beginPath(); ctx.moveTo(S.x,S.y); arc(S.x,S.y,R,sw-spread,sw+spread); ctx.closePath(); ctx.fill();
+    }
+    ctx.strokeStyle = `rgba(${rc},${S.tiltOn ? .55 : .2})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(S.x,S.y);
+    ctx.lineTo(S.x + Math.cos(sw)*R, S.y + Math.sin(sw)*R); ctx.stroke();
+
+    // fios para os links detetados no raio
+    links.forEach(l => { const d = Math.hypot(l.cx-S.x, l.cy-S.y);
+      if (d < R && !l.visited) {
+        const a = 1 - d/R, c = ghost ? TH.man : TH.acc; ctx.strokeStyle = `rgba(${c},${.15 + a*.6})`; ctx.lineWidth = .6 + a;
+        const mx = (S.x+l.cx)/2 + (RM ? 0 : Math.sin(S.t*.05 + l.cx)*8), my = (S.y+l.cy)/2 + 10*a;
+        ctx.beginPath(); ctx.moveTo(S.x,S.y); ctx.quadraticCurveTo(mx,my,l.cx,l.cy); ctx.stroke();
+        ctx.fillStyle = `rgba(${c},.9)`; ctx.beginPath(); arc(l.cx,l.cy,2.5,0,TAU); ctx.fill();
+      }});
+    // fio para o alvo
+    if (S.target) {
+      ctx.strokeStyle = S.target.kind === 'grok' ? `rgba(${TH.hot},.8)` : `rgba(${TH.star},.5)`; ctx.lineWidth = 1;
+      ctx.setLineDash([2,4]); ctx.beginPath(); ctx.moveTo(S.x,S.y); ctx.lineTo(S.target.x,S.target.y); ctx.stroke(); ctx.setLineDash([]);
+    }
+    // rota prevista (busca): próximos 5 vizinhos
+    if (S.mode === 'busca') {
+      let px = S.target ? S.target.x : S.x, py = S.target ? S.target.y : S.y;
+      const left = links.filter(l => !l.visited && (!S.target || l !== S.target.link));
+      ctx.strokeStyle = `rgba(${TH.man},.32)`; ctx.setLineDash([1,5]); ctx.beginPath(); ctx.moveTo(px,py);
+      for (let k = 0; k < 5 && left.length; k++) {
+        let bi = 0, bd = Infinity; left.forEach((l,i) => { const d = Math.hypot(l.cx-px,l.cy-py); if (d < bd) { bd = d; bi = i; } });
+        const n = left.splice(bi,1)[0]; ctx.lineTo(n.cx,n.cy); px = n.cx; py = n.cy;
+      }
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+    // fio de seda até ao último link visitado (âncora)
+    if (S.anchor && links.includes(S.anchor)) {
+      const ax = S.x - Math.cos(S.ang)*20, ay = S.y - Math.sin(S.ang)*20, d = Math.hypot(S.anchor.cx - ax, S.anchor.cy - ay);
+      if (d > 8 && d < 520) { ctx.strokeStyle = `rgba(${TH.star},${.32*(1 - d/520)})`; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(ax, ay);
+        ctx.quadraticCurveTo((ax + S.anchor.cx)/2, (ay + S.anchor.cy)/2 + 10 + d*.08, S.anchor.cx, S.anchor.cy); ctx.stroke(); }
+    }
+    // pulsos
+    ctx.lineWidth = 2;
+    for (const p of pulses) { if (p.r <= 0) continue; ctx.strokeStyle = `rgba(${p.c || TH.acc},${clamp(1 - p.r/120, 0, 1)})`;
+      ctx.beginPath(); arc(p.x,p.y,p.r,0,TAU); ctx.stroke(); }
+    // faíscas
+    if (particles.length) {
+      ctx.globalCompositeOperation = TH.add;
+      for (const p of particles) { const a = 1 - p.life/p.max; ctx.globalAlpha = a; ctx.fillStyle = `rgb(${p.c})`; const s = p.s*(.5 + a*.5); ctx.fillRect(p.x - s/2, p.y - s/2, s, s); }
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    }
+
+    // ----- aranha -----
+    const bob = RM ? 0 : Math.sin(S.t*.22) * (.5 + Math.min(1.4, S.spd*.4));
+    const sx = 5, sy = 8;    // deslocamento da sombra (luz de cima à esquerda)
+    const L = legs.map(g => {
+      const hipA = S.ang + g.side*Math.PI/2 - g.base*g.side;
+      const hx = S.x + Math.cos(hipA)*7, hy = S.y + Math.sin(hipA)*7 - bob*.6;
+      const [kx, ky] = legIK(g, hx, hy, g.foot.x, g.foot.y);
+      return { hx, hy, kx, ky, fx:g.foot.x, fy:g.foot.y, lift:g.lift };
+    });
+    // sombra
+    ctx.strokeStyle = TH.shadow; ctx.fillStyle = TH.shadow; ctx.lineWidth = 2;
+    ctx.beginPath();
+    L.forEach(l => { ctx.moveTo(l.hx + sx, l.hy + sy); ctx.lineTo(l.kx + sx*.8, l.ky + sy*.8); ctx.lineTo(l.fx + sx*.4, l.fy + sy*.4); });
+    ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(S.x + sx - Math.cos(S.ang)*4, S.y + sy - Math.sin(S.ang)*4, 22, 13, S.ang, 0, TAU); ctx.fill();
+    // patas (joelho levantado = ilusão 3D)
+    ctx.strokeStyle = TH.ink; ctx.fillStyle = TH.ink;
+    L.forEach(l => {
+      const kx = l.kx, ky = l.ky - 5 - l.lift*.4, fx = l.fx, fy = l.fy - l.lift;
+      ctx.lineWidth = 2.1; ctx.beginPath(); ctx.moveTo(l.hx, l.hy); ctx.lineTo(kx, ky); ctx.stroke();
+      ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(kx, ky); ctx.lineTo(fx, fy); ctx.stroke();
+      ctx.beginPath(); arc(kx, ky, 1.7, 0, TAU); arc(fx, fy, .9, 0, TAU); ctx.fill();
+    });
+    // corpo
+    ctx.save(); ctx.translate(S.x, S.y - bob); ctx.rotate(S.ang);
+    const br = 1 + (RM ? 0 : Math.sin(S.t*.11)*.035);
+    const bgr = ctx.createRadialGradient(-15, -4, 1, -11, 0, 15);
+    bgr.addColorStop(0, `rgba(${TH.star},.35)`); bgr.addColorStop(1, TH.body);
+    ctx.fillStyle = bgr; ctx.strokeStyle = TH.ink; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.ellipse(-11, 0, 13.5*br, 10.5*br, 0, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = TH.body; ctx.beginPath(); ctx.ellipse(6, 0, 8, 7, 0, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = TH.mark; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(-17,-4.5); ctx.lineTo(-6,4.5); ctx.moveTo(-17,4.5); ctx.lineTo(-6,-4.5); ctx.stroke();
+    ctx.strokeStyle = TH.ink; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(13,-2.5); ctx.lineTo(17,-3.5); ctx.moveTo(13,2.5); ctx.lineTo(17,3.5); ctx.stroke();
+    const blink = (S.t % 180) < 4 ? .3 : 1, eyes = [[11,-3],[11,3],[9,-5],[9,5]];
+    if (TH.add === 'lighter') { ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = TH.eye; ctx.globalAlpha = .22;
+      eyes.slice(0, 2).forEach(([x, y]) => { ctx.beginPath(); ctx.arc(x, y, 4, 0, TAU); ctx.fill(); });
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
+    ctx.fillStyle = TH.eye; eyes.forEach(([x,y],i) => { const rr = i<2 ? 1.8 : 1.1; ctx.beginPath(); ctx.ellipse(x,y,rr,Math.max(.1, rr*blink),0,0,TAU); ctx.fill(); });
+    ctx.restore();
+    ctx.lineCap = 'butt';
+
+    // pausa
+    if (S.paused) {
+      const tx = (free.x0 + free.x1)/2, ty = free.y0 + 18, msg = '⏸ PAUSADO · Espaço ou ▶ para continuar';
+      ctx.font = '600 14px ui-monospace, Menlo, monospace'; ctx.textAlign = 'center';
+      const w = ctx.measureText(msg).width + 28;
+      ctx.fillStyle = `rgba(${TH.hot},.9)`; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(tx - w/2, ty - 4, w, 30, 15); else ctx.rect(tx - w/2, ty - 4, w, 30); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.fillText(msg, tx, ty + 16);
+    }
+  }
+
+  // ---------- Mini-mapa ----------
+  let mW = 300, mH = 150;
+  function drawMini(){
+    miniDirty = false;
+    mW = mini.clientWidth || mW; mH = mini.clientHeight || mH;
+    if (!mW || !mH) return;
+    mctx.clearRect(0, 0, mW, mH);
+    const s = Math.min(mW / W, mH / H), ox = (mW - W*s)/2, oy = (mH - H*s)/2;
+    const X = x => ox + x*s, Y = y => oy + y*s;
+    mctx.strokeStyle = `rgba(${TH.acc},.25)`; mctx.setLineDash([2,3]); mctx.lineWidth = 1;
+    mctx.strokeRect(X(free.x0), Y(free.y0), (free.x1 - free.x0)*s, (free.y1 - free.y0)*s); mctx.setLineDash([]);
+    mctx.lineWidth = 1;
+    edges.forEach(e => { mctx.globalAlpha = isHidden(e.a) || isHidden(e.b) ? .08 : .6;
+      mctx.strokeStyle = e.a.type && e.a.type === e.b.type ? cor(e.a.type) : TH.thread;
+      mctx.beginPath(); mctx.moveTo(X(e.a.cx), Y(e.a.cy)); mctx.lineTo(X(e.b.cx), Y(e.b.cy)); mctx.stroke(); });
+    links.forEach(l => {
+      mctx.globalAlpha = isHidden(l) ? .15 : l.type ? 1 : l.seen ? .8 : .35;
+      mctx.fillStyle = l.type ? cor(l.type) : TH.ink;
+      mctx.beginPath(); mctx.arc(X(l.cx), Y(l.cy), l.type === 'perfeito' ? 3.6 : l.visited ? 2.8 : 2, 0, TAU); mctx.fill();
+    });
+    mctx.globalAlpha = 1;
+    const g = grok.getBoundingClientRect(); mctx.fillStyle = `rgba(${TH.hot},.8)`; mctx.fillRect(X(g.left), Y(g.top), Math.max(3, g.width*s), Math.max(2, g.height*s));
+    const rc = S.mode === 'manual' ? TH.man : TH.acc;
+    mctx.strokeStyle = `rgba(${rc},.7)`; mctx.beginPath(); mctx.arc(X(S.x), Y(S.y), Math.max(0, S.R*s), 0, TAU); mctx.stroke();
+    mctx.fillStyle = `rgb(${rc})`; mctx.beginPath(); mctx.arc(X(S.x), Y(S.y), 3, 0, TAU); mctx.fill();
+  }
+  mini.addEventListener('pointerdown', e => {   // tocar no mapa: escolhe o link mais próximo desse ponto
+    const r = mini.getBoundingClientRect(), s = Math.min(r.width / W, r.height / H), ox = (r.width - W*s)/2, oy = (r.height - H*s)/2;
+    const x = (e.clientX - r.left - ox) / s, y = (e.clientY - r.top - oy) / s;
+    let best = null, bd = Infinity;
+    links.forEach(l => { const d = Math.hypot(l.cx - x, l.cy - y) + (S.mode === 'busca' && l.visited ? 60 : 0); if (d < bd) { bd = d; best = l; } });
+    if (best && bd < 160) tapLink(best);
+  });
+
+  // ---------- Ciclo: lógica a 60 Hz fixos, desenho a cada frame (também em ecrãs de 120 Hz) ----------
+  const DT = 1000/60;
+  let lastT = performance.now(), acc = 0, frame = 0;
+  function frameTick(now){
+    acc += Math.min(200, Math.max(0, now - lastT)); lastT = now;
+    let n = 0;
+    while (acc >= DT && n < 4) { if (!S.paused) step(); acc -= DT; n++; }
+    if (n >= 4) acc = 0;
+    if (!RM || bgDirty) drawBg();
+    draw(); frame++;
+    if (miniDirty || (!RM && !S.paused && frame % 6 === 0)) drawMini();
+    if (top5Dirty) renderTop5();
+  }
+  function loop(now){ frameTick(now); requestAnimationFrame(loop); }
+
+  // ---------- Controlos ----------
+  const names = { busca:'automático', manual:'manual' };
+  const hints = {
+    busca: 'A aranha procura sozinha os links por tocar. Toca num link (ou no mapa) para o escolher como próximo alvo. <b>GROK</b>, <b>⇄ Modo</b> ou dois dedos → manual.',
+    manual: 'Arrasta a Apple Pencil, o dedo ou o rato: o raio deteta e lê os links. Mais pressão = raio maior. A pairar só pré-visualiza. Toca num link para o ler já.'
+  };
+  function setMode(m){
+    const changed = S.mode !== m;
+    S.mode = m; S.target = null; S.pause = 0; S.grokIn = false;
+    document.querySelectorAll('#modes button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+    document.body.classList.toggle('manual', m === 'manual');
+    grok.querySelector('small').textContent = m === 'busca' ? '→ manual' : '→ automático';
+    setTxt('hMode', names[m]); $('hint').innerHTML = hints[m]; log('modo: ' + names[m], true);
+    if (changed) SND.play('modo');
+    if (m === 'busca') { S.vx = S.vy = 0; S.R = S.Rbase; }
+    else { P.x = P.px = S.x; P.y = P.py = S.y; }        // a aranha fica onde está até a caneta/dedo a mover
+    miniDirty = true;
+    requestAnimationFrame(() => { const h = $('hint').getBoundingClientRect(); if (h.bottom + 12 > free.y0 + 4) onResize(true); });
+  }
+  const toggleMode = () => setMode(S.mode === 'busca' ? 'manual' : 'busca');
+  function setPaused(v){
+    S.paused = v; const b = $('bPausa'); b.classList.toggle('on', v); b.textContent = v ? '▶ Continuar' : '⏸ Pausar';
+    setTxt('hState', v ? 'em pausa' : 'a explorar'); log(v ? '⏸ em pausa' : '▶ a continuar', true);
+  }
+  function setSpeed(v){
+    S.speed = clamp(+v || 1, .5, 3); $('spd').value = S.speed;
+    setTxt('spdV', S.speed.toFixed(2).replace(/\.?0+$/, '').replace('.', ',') + '×');
+  }
+  function setTheme(name, quiet){
+    if (!THEMES[name]) return;
+    thName = name; TH = THEMES[name];
+    THEME_ORDER.forEach(n => document.body.classList.toggle('th-' + n, n === name));
+    setTxt('temaNome', name);
+    const meta = document.querySelector('meta[name=theme-color]'); if (meta) meta.setAttribute('content', TH.meta);
+    store.set('gc2.tema', name); bgDirty = true; miniDirty = true;
+    if (!quiet) log('tema: ' + name, true);
+  }
+  function setCount(n){
+    if (![20,40,80].includes(n)) return;
+    S.nLinks = n; store.set('gc2.links', String(n));
+    document.querySelectorAll('#nLinks button').forEach(b => b.classList.toggle('on', +b.dataset.n === n));
+    resetSite('novo site com ' + n + ' links');
+  }
+  document.querySelectorAll('#modes button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.m)));
+  $('bModo').addEventListener('click', toggleMode);
+  $('bRmais').addEventListener('click', () => setRBase(S.Rbase + 20));
+  $('bRmenos').addEventListener('click', () => setRBase(S.Rbase - 20));
+  $('bReset').addEventListener('click', () => resetSite('novo site carregado'));
+  $('bPausa').addEventListener('click', () => setPaused(!S.paused));
+  $('spd').addEventListener('input', e => setSpeed(e.target.value));
+  $('spd').addEventListener('change', () => log('velocidade: ' + $('spdV').textContent));
+  $('nLinks').addEventListener('click', e => { const b = e.target.closest('button[data-n]'); if (b) setCount(+b.dataset.n); });
+  $('bTema').addEventListener('click', () => setTheme(THEME_ORDER[(THEME_ORDER.indexOf(thName) + 1) % THEME_ORDER.length]));
+  $('bSom').addEventListener('click', () => {
+    const on = SND.toggle(); const b = $('bSom');
+    b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); b.textContent = on ? '🔊 Sons' : '🔇 Sons';
+    log(on ? 'sons ligados' : (SND.ac ? 'sons desligados' : 'sons indisponíveis neste browser'));
+    if (on) SND.play('modo');
+  });
+  function showIntro(v){ $('intro').hidden = !v; if (!v) store.set('gc2.intro', '1'); }
+  $('bAjuda').addEventListener('click', () => showIntro(true));
+  $('introOk').addEventListener('click', () => showIntro(false));
+  $('intro').addEventListener('pointerdown', e => { if (e.target.id === 'intro') showIntro(false); });
+  $('sheetHead').addEventListener('click', () => { $('panel').classList.toggle('closed');
+    if (portrait) document.body.classList.toggle('sheet-open', !$('panel').classList.contains('closed')); else onResize(true);
+    miniDirty = true; });
+  addEventListener('keydown', e => {
+    if (e.target && e.target.id === 'goal') return;
+    if (!$('intro').hidden) { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showIntro(false); } return; }
+    if (e.key === ' ' || e.code === 'Space') {
+      e.preventDefault(); if (document.activeElement && document.activeElement.tagName === 'BUTTON') document.activeElement.blur();
+      if (!e.repeat) setPaused(!S.paused); return;
+    }
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'm' || e.key === 'M') toggleMode();
+    if (e.key === 'r' || e.key === 'R') resetSite('novo site carregado');
+    if (e.key === 't' || e.key === 'T') $('bTema').click();
+    if (e.key === '+' || e.key === '=') setRBase(S.Rbase + 15);
+    if (e.key === '-' || e.key === '_') setRBase(S.Rbase - 15);
+  });
+
+  // ---------- Rotação / redimensionamento ----------
+  let rzT = null, lastOrient = null;
+  function onResize(now){
+    const run = () => {
+      if (document.activeElement && document.activeElement.id === 'goal' && Math.abs(innerWidth - W) < 2) return; // teclado no ecrã
+      sizeCanvas();
+      const wasPortrait = lastOrient; computeLayout(); lastOrient = portrait;
+      if (wasPortrait !== null && wasPortrait !== portrait) {
+        // ao rodar: folha fechada em retrato, painel aberto em paisagem
+        $('panel').classList.toggle('closed', portrait); computeLayout();
+        log(portrait ? '↻ retrato — links reorganizados' : '↻ paisagem — links reorganizados', true);
+      }
+      relayoutLinks();
+      S.x = clamp(S.x, 0, W); S.y = clamp(S.y, 0, H); P.x = clamp(P.x, 0, W); P.y = clamp(P.y, 0, H);
+      if (S.target && S.target.link) { S.target.x = S.target.link.cx; S.target.y = S.target.link.cy; }
+      else if (S.target && S.target.kind === 'grok') S.target = grokTarget();
+    };
+    clearTimeout(rzT); if (now === true) run(); else rzT = setTimeout(run, 180);
+  }
+  addEventListener('resize', onResize);
+  // se a doca mudar de tamanho (tipos de letra a carregar, texto do HUD…), volta a arrumar os links que ficaram por baixo
+  function checkClear(){
+    const ob = obstacles(); measure();
+    if (links.some(l => ob.some(o => overlaps({ x:l.box.left, y:l.box.top, w:l.box.width, h:l.box.height }, o, 0)))) { computeLayout(); relayoutLinks(); }
+  }
+  try { let lastD = ''; new ResizeObserver(() => { const r = $('dock').getBoundingClientRect(), k = Math.round(r.width) + 'x' + Math.round(r.height);
+    if (k !== lastD) { const first = !lastD; lastD = k; if (!first) requestAnimationFrame(checkClear); } }).observe($('dock')); } catch (_) {}
+  setTimeout(checkClear, 400); setTimeout(checkClear, 1500);
+  try { document.fonts && document.fonts.ready.then(() => requestAnimationFrame(checkClear)); } catch (_) {}
+  addEventListener('orientationchange', () => setTimeout(() => onResize(true), 250));
+  if (window.visualViewport) visualViewport.addEventListener('resize', onResize);
+
+  // ---------- Arranque ----------
+  setTheme(thName, true);
+  sizeCanvas();
+  portrait = H > W;
+  if (portrait) $('panel').classList.add('closed');
+  document.querySelectorAll('#nLinks button').forEach(b => b.classList.toggle('on', +b.dataset.n === S.nLinks));
+  setSpeed(1);
+  renderLegend(); setMode('busca'); computeLayout(); lastOrient = portrait;
+  S.x = free.x0 + 70; S.y = free.y0 + 70; legs.forEach(g => { g.foot.x = S.x; g.foot.y = S.y; });
+  buildSite(); log('crawler v2 iniciado · desktop + iPad + Apple Pencil', true);
+  if (store.get('gc2.intro') !== '1') showIntro(true);
+  requestAnimationFrame(loop);
+
+  // gancho para testes automáticos (não interfere com o uso normal)
+  window.__grokCrawler = { S, P, get links(){ return links; }, get edges(){ return edges; }, history, hidden, particles,
+    step, draw, drawMini, frameTick, buildReport, exportar, setTheme, setPaused, setSpeed, setCount, setMode, resetSite, applyFilter, showIntro, renderTop5 };
+})();
+</script>
+</body>
+</html>
