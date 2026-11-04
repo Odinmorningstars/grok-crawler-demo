@@ -1,70 +1,113 @@
 <!DOCTYPE html><html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Os meus links</title>
+<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)"><meta name="theme-color" content="#f6f8fa" media="(prefers-color-scheme: light)">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Os meus links"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon.svg">
 <style>
-*{box-sizing:border-box}body{margin:0;font:17px -apple-system,system-ui,sans-serif;background:#0d1117;color:#e6edf3;padding:16px;padding-bottom:60px}
-h1{margin:4px 0 12px;font-size:26px}h2{font-size:20px;margin:24px 0 10px}
-.card{background:#161b22;border:1px solid #30363d;border-radius:14px;padding:14px;margin-bottom:12px}
-button,select,input,a.btn{min-height:48px;font-size:17px;border-radius:10px;border:1px solid #30363d;touch-action:manipulation}
-button,a.btn{background:#238636;color:#fff;padding:0 16px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
-button.sec,a.sec{background:#21262d}button.del{background:#6e2a2a}
-input,select{background:#0d1117;color:#e6edf3;padding:0 12px;width:100%}
-.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 1 140px}
+:root{--bg:#0d1117;--card:#161b22;--bd:#30363d;--tx:#e6edf3;--mu:#8b949e;--sec:#21262d;--ac:#58a6ff}
+@media (prefers-color-scheme:light){:root{--bg:#f6f8fa;--card:#fff;--bd:#d0d7de;--tx:#1f2328;--mu:#59636e;--sec:#eaeef2;--ac:#0969da}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;font:17px -apple-system,system-ui,sans-serif;background:var(--bg);color:var(--tx);padding:16px;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 80px max(16px,env(safe-area-inset-left));overflow-x:hidden}
+main{max-width:980px;margin:0 auto}
+h1{margin:4px 0 12px;font-size:26px}h2{font-size:20px;margin:24px 0 10px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}h2 small{font-size:14px;color:var(--mu);font-weight:400}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px;min-width:0}
+button,select,input,a.btn{min-height:48px;font-size:17px;border-radius:10px;border:1px solid var(--bd);touch-action:manipulation;font-family:inherit}
+button,a.btn{background:#238636;color:#fff;padding:0 14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+button.sec,a.sec{background:var(--sec);color:var(--tx)}button.del{background:#a33}button.on{outline:3px solid var(--ac)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+input,select{background:var(--bg);color:var(--tx);padding:0 12px;width:100%;min-width:0}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 1 130px}
 .big{width:100%;min-height:60px;font-size:20px;background:#1f6feb}
-.link{display:flex;flex-direction:column;gap:8px}.link .t{font-weight:600}.link .u{color:#8b949e;font-size:14px;word-break:break-all}
-.hint{color:#8b949e;font-size:14px}
-#pad{width:100%;height:340px;background:#f6f3e8;border-radius:12px;touch-action:pan-y;display:block}
-</style></head><body>
+.link{display:flex;flex-direction:column;gap:8px}.link .t{font-weight:600;display:flex;gap:8px;align-items:center}.link .u{color:var(--mu);font-size:14px;word-break:break-all}
+.link .row>*{flex:1 1 90px}.fav{flex:0 0 48px!important;font-size:22px;padding:0}
+.hint{color:var(--mu);font-size:14px}.hint a{color:var(--ac)}
+#pad{width:100%;height:380px;background:#f6f3e8;border-radius:12px;touch-action:pan-y;display:block}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:center}.tools>*{flex:0 0 auto}
+.sw{width:48px;padding:0;border:3px solid var(--bd)}.sw.on{outline:3px solid var(--ac)}
+#toast{position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%);background:#1f2328;color:#fff;border-radius:12px;padding:8px 8px 8px 16px;display:none;align-items:center;gap:12px;box-shadow:0 6px 24px #0006;max-width:calc(100% - 32px);z-index:9}
+#toast.show{display:flex}#toast button{min-height:44px}
+.empty{color:var(--mu);text-align:center;padding:20px}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style></head><body><main>
 <h1>🕷️ Os meus links</h1>
-<button class="big" id="openRT">Abrir tempo real ao lado</button>
-<p class="hint">Alternativa: <a href="tempo-real.html" target="_blank" rel="noopener" style="color:#58a6ff">tempo-real.html</a>. No iPad, mantém o dedo no link e escolhe "Abrir em Split View" para ver as duas páginas lado a lado.</p>
+<div class="row"><button class="big" id="both">Abrir os dois (links + tempo real)</button><a class="btn sec" href="tempo-real.html" style="flex:0 1 200px">Só tempo real →</a></div>
+<p class="hint">No iPad: mantém o dedo em <a href="tempo-real.html" target="_blank" rel="noopener">tempo-real.html</a> e escolhe "Abrir em Split View" para veres as duas páginas lado a lado. Para teres como app: Partilhar → "Adicionar ao ecrã principal".</p>
 
 <h2>Pesquisar na internet</h2>
-<div class="card"><form id="sf" class="row"><input id="q" placeholder="O que queres procurar?" enterkeyhint="search" autocomplete="off">
-<select id="eng"><option value="ddg">DuckDuckGo</option><option value="g">Google</option><option value="n">Notícias</option><option value="i">Imagens</option><option value="yt">YouTube</option><option value="gh">GitHub</option><option value="vt">VirusTotal</option></select>
-<button type="submit">Pesquisar</button><button type="button" class="sec" id="saveQ">Guardar como link</button></form><p class="hint" id="sMsg"></p></div>
+<div class="card"><form id="sf" class="row"><input id="q" type="search" placeholder="O que queres procurar?" enterkeyhint="search" autocomplete="off" aria-label="Pesquisa">
+<select id="eng" aria-label="Motor"><option value="ddg">DuckDuckGo</option><option value="g">Google</option><option value="n">Notícias</option><option value="i">Imagens</option><option value="yt">YouTube</option><option value="gh">GitHub</option><option value="vt">VirusTotal</option></select>
+<button type="submit">Pesquisar</button><button type="button" class="sec" id="saveQ">Guardar como link</button></form><p class="hint" id="sMsg" aria-live="polite"></p></div>
 
-<h2>Links guardados</h2>
+<h2>Links guardados <small id="cnt"></small></h2>
+<div class="card"><div class="row"><input id="flt" type="search" placeholder="Filtrar links…" aria-label="Filtrar links" autocomplete="off"><button class="sec" id="onlyFav" aria-pressed="false" style="flex:0 1 180px">☆ Só favoritos</button></div></div>
 <div id="list"></div>
-<div class="card"><form id="af" class="row"><input id="at" placeholder="Título"><input id="au" placeholder="https://..." inputmode="url" autocapitalize="off"><button type="submit">Adicionar</button></form>
+<div class="card"><form id="af" class="row"><input id="at" placeholder="Título" enterkeyhint="next"><input id="au" placeholder="https://..." inputmode="url" autocapitalize="off" autocorrect="off" enterkeyhint="done"><button type="submit">Adicionar</button></form>
 <p class="hint">O botão VirusTotal abre a página de análise do endereço no VirusTotal; a verificação é feita lá por ti.</p>
 <div class="row"><button class="sec" id="exp">Exportar cópia (JSON)</button><button class="sec" id="imp">Importar cópia</button><input type="file" id="impf" accept="application/json,.json" hidden></div></div>
 
 <h2>Notas à mão</h2>
-<div class="card"><canvas id="pad"></canvas><p class="hint">O Apple Pencil desenha (sensível à pressão). O dedo faz scroll à página.</p>
-<div class="row"><button class="sec" id="undo">Desfazer</button><button class="del" id="clr">Limpar</button><button id="svp">Guardar notas</button></div><p class="hint" id="pMsg"></p></div>
+<div class="card"><div class="tools" role="toolbar" aria-label="Ferramentas de desenho">
+<button class="sw on" data-c="#1a1a2e" style="background:#1a1a2e" aria-label="Preto"></button><button class="sw" data-c="#1f6feb" style="background:#1f6feb" aria-label="Azul"></button><button class="sw" data-c="#d1242f" style="background:#d1242f" aria-label="Vermelho"></button><button class="sw" data-c="#1a7f37" style="background:#1a7f37" aria-label="Verde"></button><button class="sw" data-c="#bf8700" style="background:#bf8700" aria-label="Dourado"></button>
+<button class="sec" id="eras" aria-pressed="false">🧽 Borracha</button>
+<label class="hint" style="display:flex;align-items:center;gap:6px">Espessura <input type="range" id="thk" min="1" max="12" value="4" style="width:120px;min-height:44px"></label>
+<label class="hint" style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="fing" style="width:24px;min-height:24px"> Desenhar com o dedo</label></div>
+<canvas id="pad" aria-label="Área de notas"></canvas><p class="hint">O Apple Pencil desenha (sensível à pressão). O dedo faz scroll, a não ser que ligues "Desenhar com o dedo". As notas guardam-se sozinhas neste aparelho.</p>
+<div class="row"><button class="sec" id="undo">↶ Desfazer</button><button class="del" id="clr">Limpar</button><button id="png">Descarregar PNG</button></div><p class="hint" id="pMsg" aria-live="polite"></p></div>
+</main>
+<div id="toast" role="status"><span id="tmsg"></span><button class="sec" id="tundo">Anular</button></div>
 <script>
 const K='gc_links_v1',$=id=>document.getElementById(id);
-const seed=[["Grok Crawler demo","https://odinmorningstars.github.io/grok-crawler-demo/"],["Osiris marítimo","https://www.osirisai.live/?layers=maritime"],["Osiris aviões/barcos/câmaras","https://www.osirisai.live/?layers=flights,maritime,cctv"],["Repo grok-crawler-demo","https://github.com/Odinmorningstars/grok-crawler-demo"],["Repo grok-crawler (privado)","https://github.com/Odinmorningstars/grok-crawler"]].map(([t,u])=>({t,u}));
+const seed=[["Grok Crawler demo","https://odinmorningstars.github.io/grok-crawler-demo/"],["Tempo real","https://odinmorningstars.github.io/grok-crawler-demo/tempo-real.html"],["Osiris marítimo","https://www.osirisai.live/?layers=maritime"],["Osiris aviões/barcos/câmaras","https://www.osirisai.live/?layers=flights,maritime,cctv"],["Repo grok-crawler-demo","https://github.com/Odinmorningstars/grok-crawler-demo"],["Repo grok-crawler (privado)","https://github.com/Odinmorningstars/grok-crawler"]].map(([t,u])=>({t,u}));
 let links;try{links=JSON.parse(localStorage.getItem(K))}catch(e){}if(!Array.isArray(links))links=seed;
+links=links.filter(x=>x&&x.u).map(x=>({t:String(x.t||x.u),u:String(x.u),f:!!x.f}));
 const save=()=>{try{localStorage.setItem(K,JSON.stringify(links))}catch(e){}};save();
 const vt=u=>'https://www.virustotal.com/gui/search/'+encodeURIComponent(u);
 const norm=u=>{u=u.trim();if(!/^https?:\/\//i.test(u))u='https://'+u;try{return new URL(u).href}catch(e){return null}};
 const isUrl=s=>/^(https?:\/\/)?[\w-]+(\.[\w-]+)+(\/\S*)?$/i.test(s.trim());
-function render(){const L=$('list');L.innerHTML='';links.forEach((l,i)=>{const d=document.createElement('div');d.className='card link';
-d.innerHTML='<div class="t"></div><div class="u"></div><div class="row"><a class="btn" target="_blank" rel="noopener">Abrir</a><a class="btn sec" target="_blank" rel="noopener">VirusTotal</a><button class="sec" data-m="-1">▲</button><button class="sec" data-m="1">▼</button><button class="del">Apagar</button></div>';
-d.querySelector('.t').textContent=l.t;d.querySelector('.u').textContent=l.u;const a=d.querySelectorAll('a');a[0].href=l.u;a[1].href=vt(l.u);
+let onlyFav=false,toastT;
+function toast(m,undo){$('tmsg').textContent=m;$('tundo').style.display=undo?'':'none';$('tundo').onclick=()=>{undo();hide()};$('toast').classList.add('show');clearTimeout(toastT);toastT=setTimeout(hide,6000)}
+const hide=()=>$('toast').classList.remove('show');
+async function copy(u){try{await navigator.clipboard.writeText(u)}catch(e){const t=document.createElement('textarea');t.value=u;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove()}toast('Link copiado')}
+function render(){const L=$('list'),f=$('flt').value.trim().toLowerCase();L.innerHTML='';let shown=0;
+links.forEach((l,i)=>{if(onlyFav&&!l.f)return;if(f&&!(l.t+' '+l.u).toLowerCase().includes(f))return;shown++;
+const d=document.createElement('div');d.className='card link';
+d.innerHTML='<div class="t"><span></span></div><div class="u"></div><div class="row"><button class="sec fav"></button><a class="btn" target="_blank" rel="noopener">Abrir</a><a class="btn sec" target="_blank" rel="noopener">VirusTotal</a><button class="sec cp">Copiar</button><button class="sec" data-m="-1" aria-label="Subir">▲</button><button class="sec" data-m="1" aria-label="Descer">▼</button><button class="del">Apagar</button></div>';
+d.querySelector('.t span').textContent=l.t;d.querySelector('.u').textContent=l.u;const a=d.querySelectorAll('a');a[0].href=l.u;a[1].href=vt(l.u);
+const fv=d.querySelector('.fav');fv.textContent=l.f?'★':'☆';fv.setAttribute('aria-label',l.f?'Tirar dos favoritos':'Marcar favorito');fv.setAttribute('aria-pressed',l.f);fv.onclick=()=>{l.f=!l.f;save();render()};
+d.querySelector('.cp').onclick=()=>copy(l.u);
 d.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const j=i+ +b.dataset.m;if(j<0||j>=links.length)return;[links[i],links[j]]=[links[j],links[i]];save();render()});
-d.querySelector('.del').onclick=()=>{if(confirm('Apagar "'+l.t+'"?')){links.splice(i,1);save();render()}};L.appendChild(d)})}
+d.querySelector('.del').onclick=()=>{const it=links.splice(i,1)[0];save();render();toast('Apagado: '+it.t,()=>{links.splice(i,0,it);save();render()})};L.appendChild(d)});
+if(!shown)L.innerHTML='<div class="card empty">'+(links.length?'Nenhum link corresponde ao filtro.':'Ainda não tens links guardados.')+'</div>';
+const nf=links.filter(x=>x.f).length;$('cnt').textContent=(shown<links.length?shown+' de ':'')+links.length+' link'+(links.length==1?'':'s')+(nf?' · '+nf+' ★':'')}
+$('flt').oninput=render;
+$('onlyFav').onclick=e=>{onlyFav=!onlyFav;e.currentTarget.textContent=(onlyFav?'★':'☆')+' Só favoritos';e.currentTarget.classList.toggle('on',onlyFav);e.currentTarget.setAttribute('aria-pressed',onlyFav);render()};
 render();
-$('af').onsubmit=e=>{e.preventDefault();const u=norm($('au').value);if(!u){alert('Endereço inválido');return}links.push({t:$('at').value.trim()||u,u});save();render();$('at').value=$('au').value=''};
+$('at').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('au').focus()}});
+$('af').onsubmit=e=>{e.preventDefault();const u=norm($('au').value);if(!u||!isUrl($('au').value)){toast('Endereço inválido (ex.: exemplo.pt)');return}if(links.some(x=>x.u===u)){toast('Esse link já está guardado');return}links.push({t:$('at').value.trim()||new URL(u).hostname,u,f:false});save();render();$('at').value=$('au').value='';toast('Link adicionado')};
 const E={ddg:'https://duckduckgo.com/?q=',g:'https://www.google.com/search?q=',n:'https://news.google.com/search?hl=pt-PT&q=',i:'https://duckduckgo.com/?iax=images&ia=images&q=',yt:'https://www.youtube.com/results?search_query=',gh:'https://github.com/search?q=',vt:'https://www.virustotal.com/gui/search/'};
 $('sf').onsubmit=e=>{e.preventDefault();const q=$('q').value.trim();if(!q)return;window.open(E[$('eng').value]+encodeURIComponent(q),'_blank','noopener')};
-$('saveQ').onclick=()=>{const q=$('q').value;if(!isUrl(q)){$('sMsg').textContent='Isto não parece um endereço (ex.: exemplo.pt).';return}const u=norm(q);links.push({t:new URL(u).hostname,u});save();render();$('sMsg').textContent='Guardado: '+u};
-$('openRT').onclick=()=>{const w=window.open('tempo-real.html','tempo_real');if(!w)location.href='tempo-real.html'};
-$('exp').onclick=()=>{const b=new Blob([JSON.stringify(links,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='os-meus-links.json';a.click()};
+$('saveQ').onclick=()=>{const q=$('q').value;if(!isUrl(q)){$('sMsg').textContent='Isto não parece um endereço (ex.: exemplo.pt).';return}const u=norm(q);if(links.some(x=>x.u===u)){$('sMsg').textContent='Já estava guardado.';return}links.push({t:new URL(u).hostname,u,f:false});save();render();$('sMsg').textContent='Guardado: '+u};
+$('both').onclick=()=>{const w=window.open('tempo-real.html','tempo_real');if(!w){location.href='tempo-real.html';return}toast('Tempo real aberto noutro separador. Para lado a lado, usa o Split View.')};
+$('exp').onclick=()=>dl(new Blob([JSON.stringify(links,null,2)],{type:'application/json'}),'os-meus-links.json');
+function dl(b,n){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)}
 $('imp').onclick=()=>$('impf').click();
-$('impf').onchange=async e=>{try{const d=JSON.parse(await e.target.files[0].text());if(!Array.isArray(d))throw 0;links=d.filter(x=>x&&x.u).map(x=>({t:String(x.t||x.u),u:String(x.u)}));save();render()}catch(_){alert('Ficheiro inválido')}};
+$('impf').onchange=async e=>{try{const d=JSON.parse(await e.target.files[0].text());if(!Array.isArray(d))throw 0;const old=links;links=d.filter(x=>x&&x.u).map(x=>({t:String(x.t||x.u),u:String(x.u),f:!!x.f}));save();render();toast(links.length+' links importados',()=>{links=old;save();render()})}catch(_){toast('Ficheiro inválido')}e.target.value=''};
 // notas
-const C=$('pad'),X=C.getContext('2d'),PK='gc_notes_v1';let strokes=[],cur=null,img=null;
-function size(){const r=C.getBoundingClientRect(),dp=devicePixelRatio||1;C.width=r.width*dp;C.height=r.height*dp;X.setTransform(dp,0,0,dp,0,0);draw()}
-function seg(p,q){X.lineWidth=1+(q.p||.5)*5;X.beginPath();X.moveTo(p.x,p.y);X.lineTo(q.x,q.y);X.stroke()}
-function draw(){X.clearRect(0,0,C.width,C.height);if(img)X.drawImage(img,0,0,C.clientWidth,C.clientHeight);X.strokeStyle='#1a1a2e';X.lineCap=X.lineJoin='round';strokes.forEach(s=>{for(let i=1;i<s.length;i++)seg(s[i-1],s[i])})}
+const C=$('pad'),X=C.getContext('2d'),PK='gc_notes_v1';let strokes=[],cur=null,img=null,col='#1a1a2e',eraser=false;
+function size(){const r=C.getBoundingClientRect(),dp=devicePixelRatio||1;C.width=Math.round(r.width*dp);C.height=Math.round(r.height*dp);X.setTransform(dp,0,0,dp,0,0);draw()}
+function seg(s,p,q){X.globalCompositeOperation=s.e?'destination-out':'source-over';X.strokeStyle=s.c;X.lineWidth=s.e?s.w*4:s.w*(.4+(q.p||.5)*1.2);X.beginPath();X.moveTo(p.x,p.y);X.lineTo(q.x,q.y);X.stroke()}
+function draw(){X.globalCompositeOperation='source-over';X.clearRect(0,0,C.width,C.height);if(img)X.drawImage(img,0,0,C.clientWidth,C.clientHeight);X.lineCap=X.lineJoin='round';strokes.forEach(s=>{const P=s.p;if(P.length==1)seg(s,P[0],{x:P[0].x+.1,y:P[0].y,p:P[0].p});for(let i=1;i<P.length;i++)seg(s,P[i-1],P[i])});X.globalCompositeOperation='source-over'}
 const pt=e=>{const r=C.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top,p:e.pressure||.5}};
-C.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')return;e.preventDefault();C.setPointerCapture(e.pointerId);cur=[pt(e)];strokes.push(cur)});
-C.addEventListener('pointermove',e=>{if(!cur)return;e.preventDefault();const ev=e.getCoalescedEvents?e.getCoalescedEvents():[e];ev.forEach(x=>{const p=pt(x);seg(cur[cur.length-1],p);cur.push(p)})});
-['pointerup','pointercancel'].forEach(t=>C.addEventListener(t,()=>cur=null));
-C.addEventListener('touchstart',e=>{if(e.touches[0]&&e.touches[0].touchType==='stylus')e.preventDefault()},{passive:false});
-$('undo').onclick=()=>{strokes.pop();draw()};$('clr').onclick=()=>{if(confirm('Limpar notas?')){strokes=[];img=null;localStorage.removeItem(PK);draw()}};
-$('svp').onclick=()=>{try{localStorage.setItem(PK,C.toDataURL('image/png'));$('pMsg').textContent='Notas guardadas neste iPad.'}catch(e){$('pMsg').textContent='Não foi possível guardar (espaço cheio?).'}};
+C.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&!$('fing').checked)return;e.preventDefault();C.setPointerCapture(e.pointerId);cur={c:col,w:+$('thk').value,e:eraser,p:[pt(e)]};strokes.push(cur);draw()});
+C.addEventListener('pointermove',e=>{if(!cur)return;e.preventDefault();const ev=e.getCoalescedEvents?e.getCoalescedEvents():[e];X.lineCap=X.lineJoin='round';(ev.length?ev:[e]).forEach(x=>{const p=pt(x);seg(cur,cur.p[cur.p.length-1],p);cur.p.push(p)});X.globalCompositeOperation='source-over'});
+['pointerup','pointercancel'].forEach(t=>C.addEventListener(t,()=>{if(cur){cur=null;autosave()}}));
+C.addEventListener('touchstart',e=>{const t=e.touches[0];if(t&&(t.touchType==='stylus'||$('fing').checked))e.preventDefault()},{passive:false});
+$('fing').onchange=e=>C.style.touchAction=e.target.checked?'none':'pan-y';
+let svT;function autosave(){clearTimeout(svT);svT=setTimeout(()=>{try{if(!img&&!strokes.length)localStorage.removeItem(PK);else localStorage.setItem(PK,C.toDataURL('image/png'));$('pMsg').textContent='Notas guardadas neste aparelho.'}catch(e){$('pMsg').textContent='Não foi possível guardar (espaço cheio?). Descarrega o PNG.'}},400)}
+document.querySelectorAll('.sw').forEach(b=>b.onclick=()=>{col=b.dataset.c;eraser=false;$('eras').classList.remove('on');$('eras').setAttribute('aria-pressed','false');document.querySelectorAll('.sw').forEach(x=>x.classList.toggle('on',x===b))});
+$('eras').onclick=e=>{eraser=!eraser;e.currentTarget.classList.toggle('on',eraser);e.currentTarget.setAttribute('aria-pressed',eraser);document.querySelectorAll('.sw').forEach(x=>x.classList.toggle('on',!eraser&&x.dataset.c===col))};
+$('undo').onclick=()=>{if(!strokes.length){$('pMsg').textContent='Nada para desfazer desde que abriste a página.';return}strokes.pop();draw();autosave()};
+$('clr').onclick=()=>{const os=strokes,oi=img;strokes=[];img=null;draw();localStorage.removeItem(PK);toast('Notas limpas',()=>{strokes=os;img=oi;draw();autosave()})};
+$('png').onclick=()=>{const o=document.createElement('canvas');o.width=C.width;o.height=C.height;const g=o.getContext('2d');g.fillStyle='#f6f3e8';g.fillRect(0,0,o.width,o.height);g.drawImage(C,0,0);o.toBlob(b=>dl(b,'notas-'+new Date().toISOString().slice(0,10)+'.png'),'image/png')};
 const sv=localStorage.getItem(PK);if(sv){img=new Image();img.onload=draw;img.src=sv}
-addEventListener('resize',size);size();
+let lw=0;addEventListener('resize',()=>{if(C.clientWidth!==lw){lw=C.clientWidth;size()}});lw=C.clientWidth;size();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script></body></html>

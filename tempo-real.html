@@ -1,46 +1,102 @@
 <!DOCTYPE html><html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Tempo real</title>
+<meta name="theme-color" content="#0b0f17" media="(prefers-color-scheme: dark)"><meta name="theme-color" content="#f6f8fa" media="(prefers-color-scheme: light)">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Tempo real"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon.svg">
 <style>
-*{box-sizing:border-box}body{margin:0;font:17px -apple-system,system-ui,sans-serif;background:#0b0f17;color:#e6edf3;padding:16px}
-h1{font-size:26px;margin:4px 0 12px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}
-.card{background:#141a24;border:1px solid #2a3240;border-radius:14px;padding:14px}.card h2{margin:0 0 8px;font-size:19px}
-.big{font-size:40px;font-weight:700}.upd{color:#8b949e;font-size:13px;margin-top:8px}.err{color:#f0a35e}
-button,a.btn{min-height:48px;font-size:17px;border-radius:10px;border:1px solid #2a3240;background:#1f6feb;color:#fff;padding:0 16px;touch-action:manipulation;text-decoration:none;display:inline-flex;align-items:center}
-.hours{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}.hours div{min-width:64px;background:#0b0f17;border-radius:8px;padding:6px;text-align:center;font-size:14px}
-#map{width:100%;aspect-ratio:2/1;background:#0a2540;border-radius:10px;display:block}
-</style></head><body>
+:root{--bg:#0b0f17;--card:#141a24;--bd:#2a3240;--tx:#e6edf3;--mu:#8b949e;--in:#0b0f17;--ac:#58a6ff}
+@media (prefers-color-scheme:light){:root{--bg:#f6f8fa;--card:#fff;--bd:#d0d7de;--tx:#1f2328;--mu:#59636e;--in:#f0f3f6;--ac:#0969da}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;font:17px -apple-system,system-ui,sans-serif;background:var(--bg);color:var(--tx);padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 40px max(16px,env(safe-area-inset-left));overflow-x:hidden}
+main{max-width:1100px;margin:0 auto}
+h1{font-size:26px;margin:4px 0 12px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;min-width:0}.card h2{margin:0 0 8px;font-size:19px}
+.big{font-size:40px;font-weight:700}.upd{color:var(--mu);font-size:13px;margin-top:8px}.err{color:#d97a1e}
+button,a.btn,input{min-height:48px;font-size:17px;border-radius:10px;border:1px solid var(--bd);touch-action:manipulation;font-family:inherit}
+button,a.btn{background:#1f6feb;color:#fff;padding:0 16px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+button.sec{background:var(--in);color:var(--tx)}input{background:var(--in);color:var(--tx);padding:0 12px;min-width:0}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>input{flex:1 1 200px}
+.hours{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}.hours div{min-width:64px;background:var(--in);border-radius:8px;padding:6px;text-align:center;font-size:14px}
+#map,.chart{width:100%;display:block;border-radius:10px}#map{aspect-ratio:2/1;background:#0a2540}.chart{height:120px;background:var(--in);margin-top:8px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px}.kv b{font-weight:600}
+ul.q{list-style:none;padding:0;margin:0}ul.q li{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);align-items:center}ul.q li:last-child{border:0}
+.mag{min-width:52px;text-align:center;font-weight:700;border-radius:8px;padding:6px;color:#fff}ul.q a{color:var(--ac);word-break:break-word}
+#res button{margin:4px 4px 0 0}#off{display:none;background:#9a6700;color:#fff;border-radius:10px;padding:10px 14px;margin-bottom:12px}
+.retry{margin-top:8px;min-height:44px}
+</style></head><body><main>
 <h1>📡 Tempo real</h1>
-<div class="row" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><a class="btn" href="links.html">← Os meus links</a><button id="geo">Usar a minha localização</button></div>
-<p id="loc" style="color:#8b949e"></p>
+<div id="off" role="status">Estás sem internet. Os valores abaixo são os últimos recebidos; atualizam quando a ligação voltar.</div>
+<div class="row" style="margin-bottom:8px"><a class="btn" href="links.html">← Os meus links</a><button id="geo">📍 Usar a minha localização</button><button class="sec" id="home">Ponta Delgada</button></div>
+<form id="sf" class="row" style="margin-bottom:4px"><input id="city" type="search" placeholder="Procurar local (ex.: Horta, Lisboa)" enterkeyhint="search" autocomplete="off" aria-label="Procurar local"><button type="submit">Procurar</button></form>
+<div id="res" aria-live="polite"></div>
+<p id="loc" style="color:var(--mu)"></p>
 <div class="grid">
 <div class="card"><h2>🕒 Hora</h2><div class="big" id="az"></div><div>Açores</div><div style="font-size:24px;margin-top:6px" id="utc"></div><div>UTC</div></div>
-<div class="card"><h2>🌤️ Meteorologia</h2><div id="wx">A carregar…</div><div class="hours" id="wxh"></div><div class="upd" id="wxu"></div></div>
-<div class="card"><h2>🌊 Estado do mar</h2><div id="sea">A carregar…</div><div class="upd" id="seau"></div></div>
+<div class="card"><h2>🌤️ Meteorologia</h2><div id="wx">A carregar…</div><div class="hours" id="wxh"></div><canvas class="chart" id="wind" aria-label="Vento nas próximas 24 horas"></canvas><div class="upd" id="wxu"></div></div>
+<div class="card"><h2>☀️ Sol e UV (hoje)</h2><div id="sun">A carregar…</div><div class="upd" id="sunu"></div></div>
+<div class="card"><h2>🌊 Estado do mar</h2><div id="sea">A carregar…</div><canvas class="chart" id="wave" aria-label="Altura das ondas nas próximas 24 horas"></canvas><div class="upd" id="seau"></div></div>
+<div class="card"><h2>🌍 Sismos (últimas 24 h)</h2><div id="eq">A carregar…</div><div class="upd" id="equ"></div></div>
 <div class="card"><h2>🛰️ Estação Espacial (ISS)</h2><canvas id="map"></canvas><div id="iss">A carregar…</div><div class="upd" id="issu"></div></div>
 </div>
+<p class="upd">Fontes: Open-Meteo (meteorologia, mar, locais), USGS (sismos), wheretheiss.at (ISS). Dados obtidos diretamente destes serviços.</p>
+</main>
 <script>
-const $=id=>document.getElementById(id);let lat=37.74,lon=-25.67,locName='Ponta Delgada (localização predefinida)';
-const tf=(z,s)=>new Intl.DateTimeFormat('pt-PT',{timeZone:z,hour:'2-digit',minute:'2-digit',second:s?'2-digit':undefined}).format(new Date());
+const $=id=>document.getElementById(id),LK='gc_rt_loc';const HOME={lat:37.74,lon:-25.67,name:'Ponta Delgada (predefinido)'};
+let L=HOME;try{const s=JSON.parse(localStorage.getItem(LK));if(s&&isFinite(s.lat)&&isFinite(s.lon))L=s}catch(e){}
+const tf=(z,s,d)=>new Intl.DateTimeFormat('pt-PT',{timeZone:z,hour:'2-digit',minute:'2-digit',second:s?'2-digit':undefined}).format(d||new Date());
 const stamp=()=>'Atualizado às '+tf('Atlantic/Azores',1)+' (hora dos Açores)';
-const WC={0:'Céu limpo',1:'Pouco nublado',2:'Parcialmente nublado',3:'Nublado',45:'Nevoeiro',48:'Nevoeiro',51:'Chuvisco',53:'Chuvisco',55:'Chuvisco',61:'Chuva fraca',63:'Chuva',65:'Chuva forte',80:'Aguaceiros',81:'Aguaceiros',82:'Aguaceiros fortes',95:'Trovoada',96:'Trovoada',99:'Trovoada'};
-async function j(u){const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
-const fail=(el,u,e)=>{$(el).innerHTML='<span class="err">Sem dados de momento ('+(e.message||e)+'). Nova tentativa automática.</span>';$(u).textContent='Falhou às '+tf('Atlantic/Azores',1)};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const WC={0:'Céu limpo',1:'Pouco nublado',2:'Parcialmente nublado',3:'Nublado',45:'Nevoeiro',48:'Nevoeiro',51:'Chuvisco',53:'Chuvisco',55:'Chuvisco',61:'Chuva fraca',63:'Chuva',65:'Chuva forte',71:'Neve fraca',73:'Neve',75:'Neve forte',80:'Aguaceiros',81:'Aguaceiros',82:'Aguaceiros fortes',95:'Trovoada',96:'Trovoada',99:'Trovoada'};
+const DIR=d=>['N','NE','E','SE','S','SO','O','NO'][Math.round(d/45)%8];
+async function j(u){const c=new AbortController(),t=setTimeout(()=>c.abort(),15000);try{const r=await fetch(u,{cache:'no-store',signal:c.signal});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}catch(e){throw new Error(navigator.onLine?(e.name==='AbortError'?'sem resposta':e.message):'sem internet')}finally{clearTimeout(t)}}
+const FN={};
+function fail(el,u,e,f){const had=$(el).dataset.ok;const m='<div class="err">'+(had?'Não foi possível atualizar':'Sem dados de momento')+' ('+esc(e.message||e)+').</div><button class="sec retry" data-r="'+f+'">Tentar outra vez</button>';
+if(had){let b=$(el).querySelector('.ferr');if(!b){b=document.createElement('div');b.className='ferr';$(el).appendChild(b)}b.innerHTML=m}else $(el).innerHTML=m;$(u).textContent='Falhou às '+tf('Atlantic/Azores',1)+($(u).dataset.last?' · último dado às '+$(u).dataset.last:'')}
+function ok(el,u,html){$(el).innerHTML=html;$(el).dataset.ok=1;$(u).dataset.last=tf('Atlantic/Azores');$(u).textContent=stamp()}
+document.addEventListener('click',e=>{const r=e.target.closest('[data-r]');if(r){r.disabled=true;r.textContent='A tentar…';FN[r.dataset.r]()}});
+function chart(cv,times,vals,unit,color){const dp=devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;cv.width=w*dp;cv.height=h*dp;const X=cv.getContext('2d');X.setTransform(dp,0,0,dp,0,0);X.clearRect(0,0,w,h);
+const v=vals.map(x=>x==null?NaN:x),ok=v.filter(isFinite);if(!ok.length){X.fillStyle=getComputedStyle(document.body).color;X.font='14px system-ui';X.fillText('Sem dados para o gráfico',10,24);return}
+const mx=Math.max(...ok)*1.15||1,pl=8,pr=8,pt=22,pb=20,W=w-pl-pr,H=h-pt-pb,px=i=>pl+i/(v.length-1)*W,py=x=>pt+H-x/mx*H;
+X.strokeStyle=color;X.lineWidth=2.5;X.beginPath();let s=0;v.forEach((x,i)=>{if(!isFinite(x)){s=0;return}s++?X.lineTo(px(i),py(x)):X.moveTo(px(i),py(x))});X.stroke();
+X.fillStyle=getComputedStyle(document.body).color;X.font='12px system-ui';const mi=v.indexOf(Math.max(...ok));X.fillText('máx '+Math.max(...ok)+' '+unit+' às '+times[mi].slice(11,16),pl,14);
+[0,Math.floor((v.length-1)/2),v.length-1].forEach(i=>{const t=times[i].slice(11,16);X.fillText(t,Math.min(px(i),w-pr-32),h-5)})}
 function clock(){$('az').textContent=tf('Atlantic/Azores',1);$('utc').textContent=tf('UTC',1)}
-async function wx(){try{const d=await j(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code&hourly=temperature_2m,precipitation_probability&forecast_hours=12&timezone=auto`);
-const c=d.current;$('wx').innerHTML=`<div class="big">${Math.round(c.temperature_2m)}°C</div>${WC[c.weather_code]||'Código '+c.weather_code} · sensação ${Math.round(c.apparent_temperature)}°C<br>Humidade ${c.relative_humidity_2m}% · vento ${Math.round(c.wind_speed_10m)} km/h`;
-$('wxh').innerHTML=d.hourly.time.map((t,i)=>`<div>${t.slice(11,16)}<br><b>${Math.round(d.hourly.temperature_2m[i])}°</b><br>💧${d.hourly.precipitation_probability[i]??'–'}%</div>`).join('');$('wxu').textContent=stamp()}catch(e){fail('wx','wxu',e);$('wxh').innerHTML=''}}
-async function sea(){try{const d=await j(`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&current=wave_height,wave_period,wave_direction,sea_surface_temperature&timezone=auto`);const c=d.current;
-if(c.wave_height==null){$('sea').innerHTML='<span class="err">Sem dados de mar para este local (talvez longe da costa).</span>'}else $('sea').innerHTML=`<div class="big">${c.wave_height} m</div>Período ${c.wave_period} s · direção ${c.wave_direction}°${c.sea_surface_temperature!=null?'<br>Água '+c.sea_surface_temperature+'°C':''}`;$('seau').textContent=stamp()}catch(e){fail('sea','seau',e)}}
-const M=$('map'),X=M.getContext('2d');let trail=[];
-function drawMap(p){const dp=devicePixelRatio||1,w=M.clientWidth,h=M.clientHeight;M.width=w*dp;M.height=h*dp;X.setTransform(dp,0,0,dp,0,0);X.fillStyle='#0a2540';X.fillRect(0,0,w,h);X.strokeStyle='#1e4a75';X.lineWidth=1;
-for(let a=-180;a<=180;a+=30){const x=(a+180)/360*w;X.beginPath();X.moveTo(x,0);X.lineTo(x,h);X.stroke()}for(let a=-90;a<=90;a+=30){const y=(90-a)/180*h;X.beginPath();X.moveTo(0,y);X.lineTo(w,y);X.stroke()}
-const P=(la,lo)=>[(lo+180)/360*w,(90-la)/180*h];const[ux,uy]=P(lat,lon);X.fillStyle='#3fb950';X.beginPath();X.arc(ux,uy,5,0,7);X.fill();
-X.fillStyle='#ffd33d88';trail.forEach(t=>{const[x,y]=P(t[0],t[1]);X.fillRect(x-1,y-1,2,2)});if(p){const[x,y]=P(p[0],p[1]);X.fillStyle='#ff5555';X.beginPath();X.arc(x,y,8,0,7);X.fill()}}
-async function iss(){try{const d=await j('https://api.wheretheiss.at/v1/satellites/25544');trail.push([d.latitude,d.longitude]);if(trail.length>300)trail.shift();drawMap([d.latitude,d.longitude]);
-$('iss').innerHTML=`Lat ${d.latitude.toFixed(2)}°, Lon ${d.longitude.toFixed(2)}° · altitude ${Math.round(d.altitude)} km · ${Math.round(d.velocity)} km/h<br><small>🔴 ISS · 🟢 a tua posição</small>`;$('issu').textContent=stamp()}catch(e){fail('iss','issu',e);drawMap()}}
-const showLoc=()=>$('loc').textContent='📍 '+locName+` (${lat.toFixed(2)}, ${lon.toFixed(2)})`;
-$('geo').onclick=()=>{if(!navigator.geolocation){alert('Localização não disponível');return}navigator.geolocation.getCurrentPosition(p=>{lat=p.coords.latitude;lon=p.coords.longitude;locName='A tua localização';showLoc();wx();sea();drawMap()},e=>alert('Não foi possível obter a localização: '+e.message),{timeout:15000})};
-const jobs=[[clock,1000],[iss,5000],[wx,600000],[sea,900000]];let ids=[];
+let windData;
+FN.wx=async function(){try{const d=await j(`https://api.open-meteo.com/v1/forecast?latitude=${L.lat}&longitude=${L.lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,weather_code&hourly=temperature_2m,precipitation_probability,wind_speed_10m&forecast_hours=24&daily=sunrise,sunset,uv_index_max,daylight_duration&forecast_days=1&timezone=auto`);
+const c=d.current;ok('wx','wxu',`<div class="big">${Math.round(c.temperature_2m)}°C</div>${WC[c.weather_code]||'Código '+c.weather_code} · sensação ${Math.round(c.apparent_temperature)}°C<br>Humidade ${c.relative_humidity_2m}% · vento ${Math.round(c.wind_speed_10m)} km/h ${DIR(c.wind_direction_10m)} · rajadas ${Math.round(c.wind_gusts_10m)} km/h`);
+const H=d.hourly;$('wxh').innerHTML=H.time.slice(0,12).map((t,i)=>`<div>${t.slice(11,16)}<br><b>${Math.round(H.temperature_2m[i])}°</b><br>💧${H.precipitation_probability[i]??'–'}%</div>`).join('');
+windData=[H.time,H.wind_speed_10m];chart($('wind'),H.time,H.wind_speed_10m,'km/h','#58a6ff');
+const D=d.daily,uv=D.uv_index_max[0],uvt=uv==null?'–':uv<3?'baixo':uv<6?'moderado':uv<8?'alto':uv<11?'muito alto':'extremo',dl=D.daylight_duration[0];
+ok('sun','sunu',`<div class="kv"><span>🌅 Nascer</span><b>${D.sunrise[0].slice(11,16)}</b><span>🌇 Pôr</span><b>${D.sunset[0].slice(11,16)}</b><span>⏱️ Luz do dia</span><b>${Math.floor(dl/3600)} h ${Math.round(dl%3600/60)} min</b><span>🔆 UV máximo</span><b>${uv??'–'} (${uvt})</b></div><div class="upd">Horas locais do sítio escolhido (${esc(d.timezone)}).</div>`)}
+catch(e){fail('wx','wxu',e,'wx');fail('sun','sunu',e,'wx')}};
+let waveData;
+FN.sea=async function(){try{const d=await j(`https://marine-api.open-meteo.com/v1/marine?latitude=${L.lat}&longitude=${L.lon}&current=wave_height,wave_period,wave_direction,sea_surface_temperature&hourly=wave_height&forecast_hours=24&timezone=auto`);const c=d.current;
+if(c.wave_height==null){ok('sea','seau','<span class="err">Sem dados de mar para este local (talvez longe da costa).</span>');waveData=null;chart($('wave'),['',''],[null,null],'m','')}
+else{ok('sea','seau',`<div class="big">${c.wave_height} m</div>Período ${c.wave_period} s · de ${DIR(c.wave_direction)} (${c.wave_direction}°)${c.sea_surface_temperature!=null?'<br>Água '+c.sea_surface_temperature+'°C':''}`);waveData=[d.hourly.time,d.hourly.wave_height];chart($('wave'),...waveData,'m','#3fb950')}}catch(e){fail('sea','seau',e,'sea')}};
+const dist=(a,b,c,d)=>{const R=6371,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x))};
+const mcol=m=>m>=6?'#a40e26':m>=5?'#cf222e':m>=4?'#d4691e':m>=3?'#9a6700':'#57606a';
+FN.eq=async function(){try{const d=await j('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson');const F=d.features.filter(f=>f.properties.mag!=null);
+const near=F.map(f=>({f,km:dist(L.lat,L.lon,f.geometry.coordinates[1],f.geometry.coordinates[0])})).filter(x=>x.km<=1000).sort((a,b)=>b.f.properties.mag-a.f.properties.mag).slice(0,5);
+const top=[...F].sort((a,b)=>b.properties.mag-a.properties.mag).slice(0,5);
+const li=(f,km)=>{const p=f.properties;return `<li><span class="mag" style="background:${mcol(p.mag)}">${p.mag.toFixed(1)}</span><span><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.place||'Local desconhecido')}</a><br><small>${tf('Atlantic/Azores',0,new Date(p.time))} (Açores) · ${Math.round(f.geometry.coordinates[2])} km prof.${km!=null?' · a '+Math.round(km)+' km':''}</small></span></li>`};
+ok('eq','equ',`<b>Perto (até 1000 km):</b>${near.length?'<ul class="q">'+near.map(x=>li(x.f,x.km)).join('')+'</ul>':'<p class="upd" style="font-size:15px">Nenhum sismo registado pelo USGS nas últimas 24 h.</p>'}<b>Maiores no mundo:</b><ul class="q">${top.map(f=>li(f)).join('')}</ul><div class="upd">${F.length} sismos no total.</div>`)}catch(e){fail('eq','equ',e,'eq')}};
+const M=$('map'),MX=M.getContext('2d');let trail=[];
+function drawMap(p){const dp=devicePixelRatio||1,w=M.clientWidth,h=M.clientHeight;M.width=w*dp;M.height=h*dp;MX.setTransform(dp,0,0,dp,0,0);MX.fillStyle='#0a2540';MX.fillRect(0,0,w,h);MX.strokeStyle='#1e4a75';MX.lineWidth=1;
+for(let a=-180;a<=180;a+=30){const x=(a+180)/360*w;MX.beginPath();MX.moveTo(x,0);MX.lineTo(x,h);MX.stroke()}for(let a=-90;a<=90;a+=30){const y=(90-a)/180*h;MX.beginPath();MX.moveTo(0,y);MX.lineTo(w,y);MX.stroke()}
+const P=(la,lo)=>[(lo+180)/360*w,(90-la)/180*h];const[ux,uy]=P(L.lat,L.lon);MX.fillStyle='#3fb950';MX.beginPath();MX.arc(ux,uy,5,0,7);MX.fill();
+MX.fillStyle='#ffd33d88';trail.forEach(t=>{const[x,y]=P(t[0],t[1]);MX.fillRect(x-1,y-1,2,2)});if(p){const[x,y]=P(p[0],p[1]);MX.fillStyle='#ff5555';MX.beginPath();MX.arc(x,y,8,0,7);MX.fill()}}
+FN.iss=async function(){try{const d=await j('https://api.wheretheiss.at/v1/satellites/25544');trail.push([d.latitude,d.longitude]);if(trail.length>300)trail.shift();drawMap([d.latitude,d.longitude]);
+ok('iss','issu',`Lat ${d.latitude.toFixed(2)}°, Lon ${d.longitude.toFixed(2)}° · altitude ${Math.round(d.altitude)} km · ${Math.round(d.velocity)} km/h · a ${Math.round(dist(L.lat,L.lon,d.latitude,d.longitude))} km de ti<br><small>🔴 ISS · 🟢 local escolhido</small>`)}catch(e){fail('iss','issu',e,'iss');drawMap(trail[trail.length-1])}};
+const showLoc=()=>$('loc').textContent='📍 '+L.name+` (${(+L.lat).toFixed(2)}, ${(+L.lon).toFixed(2)})`;
+function setLoc(n){L=n;try{localStorage.setItem(LK,JSON.stringify(L))}catch(e){}showLoc();['wx','sea','eq'].forEach(k=>{$(k).dataset.ok='';$(k).textContent='A carregar…';FN[k]()});drawMap(trail[trail.length-1])}
+$('geo').onclick=()=>{if(!navigator.geolocation){$('res').textContent='Localização não disponível neste navegador.';return}$('res').textContent='A obter localização…';navigator.geolocation.getCurrentPosition(p=>{$('res').textContent='';setLoc({lat:+p.coords.latitude.toFixed(3),lon:+p.coords.longitude.toFixed(3),name:'A tua localização'})},e=>$('res').textContent='Não foi possível obter a localização: '+e.message,{timeout:15000})};
+$('home').onclick=()=>{$('res').textContent='';setLoc(HOME)};
+$('sf').onsubmit=async e=>{e.preventDefault();const q=$('city').value.trim();if(!q)return;$('res').textContent='A procurar…';try{const d=await j('https://geocoding-api.open-meteo.com/v1/search?count=6&language=pt&name='+encodeURIComponent(q));
+if(!d.results||!d.results.length){$('res').textContent='Nenhum local encontrado para "'+q+'".';return}$('res').innerHTML='';d.results.forEach(r=>{const b=document.createElement('button');b.className='sec';const nm=[r.name,r.admin1,r.country].filter(Boolean).join(', ');b.textContent=nm;b.onclick=()=>{$('res').innerHTML='';$('city').value='';setLoc({lat:r.latitude,lon:r.longitude,name:nm})};$('res').appendChild(b)})}catch(err){$('res').innerHTML='<span class="err">Pesquisa falhou ('+esc(err.message)+').</span>'}};
+const jobs=[[clock,1000],[FN.iss,5000],[FN.wx,600000],[FN.sea,900000],[FN.eq,300000]];let ids=[];
 function start(){stop();jobs.forEach(([f,t])=>{f();ids.push(setInterval(f,t))})}function stop(){ids.forEach(clearInterval);ids=[]}
-document.addEventListener('visibilitychange',()=>document.hidden?stop():start());addEventListener('resize',()=>drawMap(trail[trail.length-1]));
+document.addEventListener('visibilitychange',()=>document.hidden?stop():start());
+const net=()=>{$('off').style.display=navigator.onLine?'none':'block'};addEventListener('online',()=>{net();start()});addEventListener('offline',net);net();
+let lw=innerWidth;addEventListener('resize',()=>{if(innerWidth===lw)return;lw=innerWidth;drawMap(trail[trail.length-1]);if(windData)chart($('wind'),...windData,'km/h','#58a6ff');if(waveData)chart($('wave'),...waveData,'m','#3fb950')});
 showLoc();drawMap();start();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script></body></html>
