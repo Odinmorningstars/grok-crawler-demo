@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Os meus links</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font:17px -apple-system,system-ui,sans-serif;background:#0d1117;color:#e6edf3;padding:16px;padding-bottom:60px}
+h1{margin:4px 0 12px;font-size:26px}h2{font-size:20px;margin:24px 0 10px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:14px;padding:14px;margin-bottom:12px}
+button,select,input,a.btn{min-height:48px;font-size:17px;border-radius:10px;border:1px solid #30363d;touch-action:manipulation}
+button,a.btn{background:#238636;color:#fff;padding:0 16px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+button.sec,a.sec{background:#21262d}button.del{background:#6e2a2a}
+input,select{background:#0d1117;color:#e6edf3;padding:0 12px;width:100%}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 1 140px}
+.big{width:100%;min-height:60px;font-size:20px;background:#1f6feb}
+.link{display:flex;flex-direction:column;gap:8px}.link .t{font-weight:600}.link .u{color:#8b949e;font-size:14px;word-break:break-all}
+.hint{color:#8b949e;font-size:14px}
+#pad{width:100%;height:340px;background:#f6f3e8;border-radius:12px;touch-action:pan-y;display:block}
+</style></head><body>
+<h1>🕷️ Os meus links</h1>
+<button class="big" id="openRT">Abrir tempo real ao lado</button>
+<p class="hint">Alternativa: <a href="tempo-real.html" target="_blank" rel="noopener" style="color:#58a6ff">tempo-real.html</a>. No iPad, mantém o dedo no link e escolhe "Abrir em Split View" para ver as duas páginas lado a lado.</p>
+
+<h2>Pesquisar na internet</h2>
+<div class="card"><form id="sf" class="row"><input id="q" placeholder="O que queres procurar?" enterkeyhint="search" autocomplete="off">
+<select id="eng"><option value="ddg">DuckDuckGo</option><option value="g">Google</option><option value="n">Notícias</option><option value="i">Imagens</option><option value="yt">YouTube</option><option value="gh">GitHub</option><option value="vt">VirusTotal</option></select>
+<button type="submit">Pesquisar</button><button type="button" class="sec" id="saveQ">Guardar como link</button></form><p class="hint" id="sMsg"></p></div>
+
+<h2>Links guardados</h2>
+<div id="list"></div>
+<div class="card"><form id="af" class="row"><input id="at" placeholder="Título"><input id="au" placeholder="https://..." inputmode="url" autocapitalize="off"><button type="submit">Adicionar</button></form>
+<p class="hint">O botão VirusTotal abre a página de análise do endereço no VirusTotal; a verificação é feita lá por ti.</p>
+<div class="row"><button class="sec" id="exp">Exportar cópia (JSON)</button><button class="sec" id="imp">Importar cópia</button><input type="file" id="impf" accept="application/json,.json" hidden></div></div>
+
+<h2>Notas à mão</h2>
+<div class="card"><canvas id="pad"></canvas><p class="hint">O Apple Pencil desenha (sensível à pressão). O dedo faz scroll à página.</p>
+<div class="row"><button class="sec" id="undo">Desfazer</button><button class="del" id="clr">Limpar</button><button id="svp">Guardar notas</button></div><p class="hint" id="pMsg"></p></div>
+<script>
+const K='gc_links_v1',$=id=>document.getElementById(id);
+const seed=[["Grok Crawler demo","https://odinmorningstars.github.io/grok-crawler-demo/"],["Osiris marítimo","https://www.osirisai.live/?layers=maritime"],["Osiris aviões/barcos/câmaras","https://www.osirisai.live/?layers=flights,maritime,cctv"],["Repo grok-crawler-demo","https://github.com/Odinmorningstars/grok-crawler-demo"],["Repo grok-crawler (privado)","https://github.com/Odinmorningstars/grok-crawler"]].map(([t,u])=>({t,u}));
+let links;try{links=JSON.parse(localStorage.getItem(K))}catch(e){}if(!Array.isArray(links))links=seed;
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(links))}catch(e){}};save();
+const vt=u=>'https://www.virustotal.com/gui/search/'+encodeURIComponent(u);
+const norm=u=>{u=u.trim();if(!/^https?:\/\//i.test(u))u='https://'+u;try{return new URL(u).href}catch(e){return null}};
+const isUrl=s=>/^(https?:\/\/)?[\w-]+(\.[\w-]+)+(\/\S*)?$/i.test(s.trim());
+function render(){const L=$('list');L.innerHTML='';links.forEach((l,i)=>{const d=document.createElement('div');d.className='card link';
+d.innerHTML='<div class="t"></div><div class="u"></div><div class="row"><a class="btn" target="_blank" rel="noopener">Abrir</a><a class="btn sec" target="_blank" rel="noopener">VirusTotal</a><button class="sec" data-m="-1">▲</button><button class="sec" data-m="1">▼</button><button class="del">Apagar</button></div>';
+d.querySelector('.t').textContent=l.t;d.querySelector('.u').textContent=l.u;const a=d.querySelectorAll('a');a[0].href=l.u;a[1].href=vt(l.u);
+d.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const j=i+ +b.dataset.m;if(j<0||j>=links.length)return;[links[i],links[j]]=[links[j],links[i]];save();render()});
+d.querySelector('.del').onclick=()=>{if(confirm('Apagar "'+l.t+'"?')){links.splice(i,1);save();render()}};L.appendChild(d)})}
+render();
+$('af').onsubmit=e=>{e.preventDefault();const u=norm($('au').value);if(!u){alert('Endereço inválido');return}links.push({t:$('at').value.trim()||u,u});save();render();$('at').value=$('au').value=''};
+const E={ddg:'https://duckduckgo.com/?q=',g:'https://www.google.com/search?q=',n:'https://news.google.com/search?hl=pt-PT&q=',i:'https://duckduckgo.com/?iax=images&ia=images&q=',yt:'https://www.youtube.com/results?search_query=',gh:'https://github.com/search?q=',vt:'https://www.virustotal.com/gui/search/'};
+$('sf').onsubmit=e=>{e.preventDefault();const q=$('q').value.trim();if(!q)return;window.open(E[$('eng').value]+encodeURIComponent(q),'_blank','noopener')};
+$('saveQ').onclick=()=>{const q=$('q').value;if(!isUrl(q)){$('sMsg').textContent='Isto não parece um endereço (ex.: exemplo.pt).';return}const u=norm(q);links.push({t:new URL(u).hostname,u});save();render();$('sMsg').textContent='Guardado: '+u};
+$('openRT').onclick=()=>{const w=window.open('tempo-real.html','tempo_real');if(!w)location.href='tempo-real.html'};
+$('exp').onclick=()=>{const b=new Blob([JSON.stringify(links,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='os-meus-links.json';a.click()};
+$('imp').onclick=()=>$('impf').click();
+$('impf').onchange=async e=>{try{const d=JSON.parse(await e.target.files[0].text());if(!Array.isArray(d))throw 0;links=d.filter(x=>x&&x.u).map(x=>({t:String(x.t||x.u),u:String(x.u)}));save();render()}catch(_){alert('Ficheiro inválido')}};
+// notas
+const C=$('pad'),X=C.getContext('2d'),PK='gc_notes_v1';let strokes=[],cur=null,img=null;
+function size(){const r=C.getBoundingClientRect(),dp=devicePixelRatio||1;C.width=r.width*dp;C.height=r.height*dp;X.setTransform(dp,0,0,dp,0,0);draw()}
+function seg(p,q){X.lineWidth=1+(q.p||.5)*5;X.beginPath();X.moveTo(p.x,p.y);X.lineTo(q.x,q.y);X.stroke()}
+function draw(){X.clearRect(0,0,C.width,C.height);if(img)X.drawImage(img,0,0,C.clientWidth,C.clientHeight);X.strokeStyle='#1a1a2e';X.lineCap=X.lineJoin='round';strokes.forEach(s=>{for(let i=1;i<s.length;i++)seg(s[i-1],s[i])})}
+const pt=e=>{const r=C.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top,p:e.pressure||.5}};
+C.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')return;e.preventDefault();C.setPointerCapture(e.pointerId);cur=[pt(e)];strokes.push(cur)});
+C.addEventListener('pointermove',e=>{if(!cur)return;e.preventDefault();const ev=e.getCoalescedEvents?e.getCoalescedEvents():[e];ev.forEach(x=>{const p=pt(x);seg(cur[cur.length-1],p);cur.push(p)})});
+['pointerup','pointercancel'].forEach(t=>C.addEventListener(t,()=>cur=null));
+C.addEventListener('touchstart',e=>{if(e.touches[0]&&e.touches[0].touchType==='stylus')e.preventDefault()},{passive:false});
+$('undo').onclick=()=>{strokes.pop();draw()};$('clr').onclick=()=>{if(confirm('Limpar notas?')){strokes=[];img=null;localStorage.removeItem(PK);draw()}};
+$('svp').onclick=()=>{try{localStorage.setItem(PK,C.toDataURL('image/png'));$('pMsg').textContent='Notas guardadas neste iPad.'}catch(e){$('pMsg').textContent='Não foi possível guardar (espaço cheio?).'}};
+const sv=localStorage.getItem(PK);if(sv){img=new Image();img.onload=draw;img.src=sv}
+addEventListener('resize',size);size();
+</script></body></html>

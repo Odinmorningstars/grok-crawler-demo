@@ -1,0 +1,46 @@
+<!DOCTYPE html><html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Tempo real</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font:17px -apple-system,system-ui,sans-serif;background:#0b0f17;color:#e6edf3;padding:16px}
+h1{font-size:26px;margin:4px 0 12px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}
+.card{background:#141a24;border:1px solid #2a3240;border-radius:14px;padding:14px}.card h2{margin:0 0 8px;font-size:19px}
+.big{font-size:40px;font-weight:700}.upd{color:#8b949e;font-size:13px;margin-top:8px}.err{color:#f0a35e}
+button,a.btn{min-height:48px;font-size:17px;border-radius:10px;border:1px solid #2a3240;background:#1f6feb;color:#fff;padding:0 16px;touch-action:manipulation;text-decoration:none;display:inline-flex;align-items:center}
+.hours{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}.hours div{min-width:64px;background:#0b0f17;border-radius:8px;padding:6px;text-align:center;font-size:14px}
+#map{width:100%;aspect-ratio:2/1;background:#0a2540;border-radius:10px;display:block}
+</style></head><body>
+<h1>📡 Tempo real</h1>
+<div class="row" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><a class="btn" href="links.html">← Os meus links</a><button id="geo">Usar a minha localização</button></div>
+<p id="loc" style="color:#8b949e"></p>
+<div class="grid">
+<div class="card"><h2>🕒 Hora</h2><div class="big" id="az"></div><div>Açores</div><div style="font-size:24px;margin-top:6px" id="utc"></div><div>UTC</div></div>
+<div class="card"><h2>🌤️ Meteorologia</h2><div id="wx">A carregar…</div><div class="hours" id="wxh"></div><div class="upd" id="wxu"></div></div>
+<div class="card"><h2>🌊 Estado do mar</h2><div id="sea">A carregar…</div><div class="upd" id="seau"></div></div>
+<div class="card"><h2>🛰️ Estação Espacial (ISS)</h2><canvas id="map"></canvas><div id="iss">A carregar…</div><div class="upd" id="issu"></div></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);let lat=37.74,lon=-25.67,locName='Ponta Delgada (localização predefinida)';
+const tf=(z,s)=>new Intl.DateTimeFormat('pt-PT',{timeZone:z,hour:'2-digit',minute:'2-digit',second:s?'2-digit':undefined}).format(new Date());
+const stamp=()=>'Atualizado às '+tf('Atlantic/Azores',1)+' (hora dos Açores)';
+const WC={0:'Céu limpo',1:'Pouco nublado',2:'Parcialmente nublado',3:'Nublado',45:'Nevoeiro',48:'Nevoeiro',51:'Chuvisco',53:'Chuvisco',55:'Chuvisco',61:'Chuva fraca',63:'Chuva',65:'Chuva forte',80:'Aguaceiros',81:'Aguaceiros',82:'Aguaceiros fortes',95:'Trovoada',96:'Trovoada',99:'Trovoada'};
+async function j(u){const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+const fail=(el,u,e)=>{$(el).innerHTML='<span class="err">Sem dados de momento ('+(e.message||e)+'). Nova tentativa automática.</span>';$(u).textContent='Falhou às '+tf('Atlantic/Azores',1)};
+function clock(){$('az').textContent=tf('Atlantic/Azores',1);$('utc').textContent=tf('UTC',1)}
+async function wx(){try{const d=await j(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code&hourly=temperature_2m,precipitation_probability&forecast_hours=12&timezone=auto`);
+const c=d.current;$('wx').innerHTML=`<div class="big">${Math.round(c.temperature_2m)}°C</div>${WC[c.weather_code]||'Código '+c.weather_code} · sensação ${Math.round(c.apparent_temperature)}°C<br>Humidade ${c.relative_humidity_2m}% · vento ${Math.round(c.wind_speed_10m)} km/h`;
+$('wxh').innerHTML=d.hourly.time.map((t,i)=>`<div>${t.slice(11,16)}<br><b>${Math.round(d.hourly.temperature_2m[i])}°</b><br>💧${d.hourly.precipitation_probability[i]??'–'}%</div>`).join('');$('wxu').textContent=stamp()}catch(e){fail('wx','wxu',e);$('wxh').innerHTML=''}}
+async function sea(){try{const d=await j(`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&current=wave_height,wave_period,wave_direction,sea_surface_temperature&timezone=auto`);const c=d.current;
+if(c.wave_height==null){$('sea').innerHTML='<span class="err">Sem dados de mar para este local (talvez longe da costa).</span>'}else $('sea').innerHTML=`<div class="big">${c.wave_height} m</div>Período ${c.wave_period} s · direção ${c.wave_direction}°${c.sea_surface_temperature!=null?'<br>Água '+c.sea_surface_temperature+'°C':''}`;$('seau').textContent=stamp()}catch(e){fail('sea','seau',e)}}
+const M=$('map'),X=M.getContext('2d');let trail=[];
+function drawMap(p){const dp=devicePixelRatio||1,w=M.clientWidth,h=M.clientHeight;M.width=w*dp;M.height=h*dp;X.setTransform(dp,0,0,dp,0,0);X.fillStyle='#0a2540';X.fillRect(0,0,w,h);X.strokeStyle='#1e4a75';X.lineWidth=1;
+for(let a=-180;a<=180;a+=30){const x=(a+180)/360*w;X.beginPath();X.moveTo(x,0);X.lineTo(x,h);X.stroke()}for(let a=-90;a<=90;a+=30){const y=(90-a)/180*h;X.beginPath();X.moveTo(0,y);X.lineTo(w,y);X.stroke()}
+const P=(la,lo)=>[(lo+180)/360*w,(90-la)/180*h];const[ux,uy]=P(lat,lon);X.fillStyle='#3fb950';X.beginPath();X.arc(ux,uy,5,0,7);X.fill();
+X.fillStyle='#ffd33d88';trail.forEach(t=>{const[x,y]=P(t[0],t[1]);X.fillRect(x-1,y-1,2,2)});if(p){const[x,y]=P(p[0],p[1]);X.fillStyle='#ff5555';X.beginPath();X.arc(x,y,8,0,7);X.fill()}}
+async function iss(){try{const d=await j('https://api.wheretheiss.at/v1/satellites/25544');trail.push([d.latitude,d.longitude]);if(trail.length>300)trail.shift();drawMap([d.latitude,d.longitude]);
+$('iss').innerHTML=`Lat ${d.latitude.toFixed(2)}°, Lon ${d.longitude.toFixed(2)}° · altitude ${Math.round(d.altitude)} km · ${Math.round(d.velocity)} km/h<br><small>🔴 ISS · 🟢 a tua posição</small>`;$('issu').textContent=stamp()}catch(e){fail('iss','issu',e);drawMap()}}
+const showLoc=()=>$('loc').textContent='📍 '+locName+` (${lat.toFixed(2)}, ${lon.toFixed(2)})`;
+$('geo').onclick=()=>{if(!navigator.geolocation){alert('Localização não disponível');return}navigator.geolocation.getCurrentPosition(p=>{lat=p.coords.latitude;lon=p.coords.longitude;locName='A tua localização';showLoc();wx();sea();drawMap()},e=>alert('Não foi possível obter a localização: '+e.message),{timeout:15000})};
+const jobs=[[clock,1000],[iss,5000],[wx,600000],[sea,900000]];let ids=[];
+function start(){stop();jobs.forEach(([f,t])=>{f();ids.push(setInterval(f,t))})}function stop(){ids.forEach(clearInterval);ids=[]}
+document.addEventListener('visibilitychange',()=>document.hidden?stop():start());addEventListener('resize',()=>drawMap(trail[trail.length-1]));
+showLoc();drawMap();start();
+</script></body></html>
