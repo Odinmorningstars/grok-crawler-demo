@@ -223,6 +223,7 @@
 <canvas id="bg"></canvas>
 <div id="page"><button id="grok" type="button">GROK<small>→ manual</small></button></div>
 <canvas id="cv"></canvas>
+<nav id="gcnav" aria-label="Páginas" style="position:fixed;z-index:7;left:max(8px,env(safe-area-inset-left));bottom:max(8px,env(safe-area-inset-bottom));display:flex;gap:4px;font:600 13px -apple-system,system-ui,sans-serif"><a href="index.html" aria-current="page" style="padding:10px 12px;border-radius:10px;background:#5cf2c4;color:#06231b;text-decoration:none">1 Crawler</a><a href="links.html" style="padding:10px 12px;border-radius:10px;background:rgba(20,26,36,.9);color:#e6edf3;text-decoration:none;border:1px solid #2a3240">2 Links</a><a href="procura.html" style="padding:10px 12px;border-radius:10px;background:rgba(20,26,36,.9);color:#e6edf3;text-decoration:none;border:1px solid #2a3240">3 Procura</a></nav>
 
 <div id="top">
   <div id="modes">
@@ -715,6 +716,7 @@
     const rec = l.rec || (l.rec = { site:S.siteNo, ordem:++S.ordem, hora:new Date().toISOString() });
     Object.assign(rec, { titulo:p.ti, texto:p.t, url:p.u, tipo:A.t, pontuacao:A.score, objetivo:$('goal').value, positivos:A.pros.slice(), alertas:A.cons.slice() });
     if (!history.includes(rec)) history.push(rec);
+    try { const F = JSON.parse(localStorage.getItem('gc_found_v1') || '[]'), k = p.u + '|' + p.ti; const i = F.findIndex(x => x.k === k); const it = { k, titulo:p.ti, url:p.u, classe:A.t, pontuacao:A.score, hora:Date.now(), origem:'crawler (página 1, site simulado)' }; if (i >= 0) F.splice(i, 1); F.unshift(it); localStorage.setItem('gc_found_v1', JSON.stringify(F.slice(0, 300))); } catch (_) {}
     if (!re) {
       pulses.push({ x:l.cx, y:l.cy, r:0, c:hexRgb(c) });
       burst(l.cx, l.cy, hexRgb(c), A.t === 'perfeito' ? 42 : A.t === 'mau' ? 16 : 20, A.t === 'perfeito' ? 3.4 : 2.4);

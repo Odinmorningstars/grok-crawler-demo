@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Procura profunda</title>
+<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)"><meta name="theme-color" content="#f6f8fa" media="(prefers-color-scheme: light)">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Procura"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon.svg">
+<style>
+:root{--bg:#0d1117;--card:#161b22;--bd:#30363d;--tx:#e6edf3;--mu:#8b949e;--sec:#21262d;--ac:#58a6ff}
+@media (prefers-color-scheme:light){:root{--bg:#f6f8fa;--card:#fff;--bd:#d0d7de;--tx:#1f2328;--mu:#59636e;--sec:#eaeef2;--ac:#0969da}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;font:17px -apple-system,system-ui,sans-serif;background:var(--bg);color:var(--tx);padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 60px max(16px,env(safe-area-inset-left));overflow-x:hidden}
+main{max-width:1000px;margin:0 auto}h1{margin:4px 0 12px;font-size:26px}h2{font-size:20px;margin:22px 0 10px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:10px;min-width:0}
+button,input,a.btn{min-height:48px;font-size:17px;border-radius:10px;border:1px solid var(--bd);touch-action:manipulation;font-family:inherit}
+button,a.btn{background:#238636;color:#fff;padding:0 14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+button.sec,a.sec{background:var(--sec);color:var(--tx)}button[aria-pressed=true]{background:#1f6feb;color:#fff;border-color:#1f6feb}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+input{background:var(--bg);color:var(--tx);padding:0 12px;width:100%;min-width:0}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 1 120px}
+.hint{color:var(--mu);font-size:14px}.hint a{color:var(--ac)}
+.src{display:flex;flex-wrap:wrap;gap:6px}.src span{font-size:14px;border-radius:8px;padding:6px 10px;background:var(--sec)}.ok{color:#2da44e}.er{color:#d1242f}
+.r{display:flex;gap:10px;align-items:flex-start}.sc{min-width:56px;text-align:center;font-weight:700;border-radius:10px;padding:8px 4px;color:#fff}.r .b{flex:1;min-width:0}
+.r .t{font-weight:600;word-break:break-word}.r .u{color:var(--mu);font-size:13px;word-break:break-all}.r .s{font-size:14px;margin:4px 0}.why{color:var(--mu);font-size:13px}
+.r .row>*{flex:0 1 auto}.tag{font-size:12px;border-radius:6px;padding:2px 6px;background:var(--sec);color:var(--mu);margin-left:6px;font-weight:400}
+.onion{border:2px dashed #bf8700}.warn{background:#9a670022;border:1px solid #bf8700;border-radius:12px;padding:12px}
+#hist button{flex:0 1 auto;min-height:40px}
+</style><style id="gcnavcss">#gcnav{position:sticky;top:0;z-index:9;display:flex;gap:6px;flex-wrap:wrap;padding:8px 0;margin:-8px 0 8px;background:var(--bg,#0d1117)}#gcnav a{min-height:44px;display:inline-flex;align-items:center;padding:0 14px;border-radius:10px;text-decoration:none;font:600 15px -apple-system,system-ui,sans-serif;border:1px solid var(--bd,#30363d);color:var(--tx,#e6edf3);background:var(--card,#161b22)}#gcnav a[aria-current]{background:#1f6feb;color:#fff;border-color:#1f6feb}</style></head><body><main><nav id="gcnav" aria-label="Páginas"><a href="index.html">1 Crawler</a><a href="links.html">2 Links</a><a href="procura.html" aria-current="page">3 Procura profunda</a><a href="tempo-real.html">📡 Tempo real</a></nav>
+<h1>🔎 Procura profunda</h1>
+<form id="f" class="row"><input id="q" type="search" placeholder="Diz ou escreve uma palavra (ex.: amor)" enterkeyhint="search" autocomplete="off" aria-label="Palavra"><button type="submit" style="flex:0 1 160px">Procurar</button></form>
+<p class="hint">No iPad, toca no 🎤 do teclado para ditar. A página junta resultados de várias fontes públicas numa só lista.</p>
+<div class="row" id="hist" aria-label="Últimas procuras"></div>
+
+<h2>Fontes</h2><div class="card"><div class="src" id="st"><span class="hint">Ainda sem procura.</span></div></div>
+
+<h2>Rede Tor (.onion)</h2>
+<div class="card warn"><p style="margin-top:0">O browser não consegue ler resultados .onion diretamente: o Ahmia (motor que filtra conteúdo abusivo) não permite leitura por outras páginas, e não uso proxies de terceiros para proteger a tua privacidade.</p>
+<p>Abre a mesma procura no Ahmia. Os endereços .onion só abrem num browser com Tor (ex.: Onion Browser no iPad, Tor Browser no computador); no Safari normal não funcionam.</p>
+<div class="row"><a class="btn" id="ahm" target="_blank" rel="noopener noreferrer">Procurar no Ahmia</a><button class="sec" id="ahmo">Copiar endereço .onion do Ahmia</button></div><p class="hint" id="ahmm"></p></div>
+
+<h2>Resultados <span class="hint" id="cnt"></span></h2>
+<div class="card"><div class="row" role="group" aria-label="Ordenar"><button class="sec" data-o="seg">Por segurança</button><button class="sec" data-o="rel">Por relevância</button><button class="sec" data-o="alf">Alfabética</button></div>
+<p class="hint" style="margin-bottom:0">A pontuação é uma <b>heurística</b> (HTTPS, domínio conhecido, sem IP, palavra no título, autoridade da fonte, texto presente). Não é uma análise de segurança nem prova que o link está acessível. Para verificar, usa o botão VirusTotal (a análise é feita lá).</p></div>
+<div id="res"></div>
+</main>
+<script src="gc-common.js"></script>
+<script>
+const $=id=>document.getElementById(id),SK='gc_search_v1',AHMIA_ONION='http://juhanurmihxlp77nkq76byazcldy2hlmovfu2epvl5ankdibsot4csyd.onion/search/?q=';
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const strip=s=>String(s||'').replace(/<[^>]+>/g,'').replace(/&quot;/g,'"').replace(/&amp;/g,'&').replace(/&#0?39;/g,"'").trim();
+let st;try{st=JSON.parse(localStorage.getItem(SK))}catch(e){}st=st||{hist:[],last:null,ord:'seg'};
+const save=()=>{try{localStorage.setItem(SK,JSON.stringify(st))}catch(e){}};
+async function j(u){const c=new AbortController(),t=setTimeout(()=>c.abort(),15000);try{const r=await fetch(u,{signal:c.signal});if(!r.ok&&r.status!==202)throw new Error('HTTP '+r.status);return await r.json()}catch(e){throw new Error(e.name==='AbortError'?'sem resposta':(navigator.onLine?e.message:'sem internet'))}finally{clearTimeout(t)}}
+const E=encodeURIComponent;
+// cada fonte: nome, autoridade (0–20), função que devolve [{t,u,s}]
+const SRC=[
+['Wikipédia (pt)',20,async q=>(await j(`https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch=${E(q)}&format=json&origin=*&srlimit=10`)).query.search.map(x=>({t:x.title,u:'https://pt.wikipedia.org/wiki/'+E(x.title.replace(/ /g,'_')),s:strip(x.snippet)}))],
+['Wikidata',15,async q=>(await j(`https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${E(q)}&language=pt&uselang=pt&format=json&origin=*&limit=8`)).search.map(x=>({t:x.label||x.id,u:'https://www.wikidata.org/wiki/'+x.id,s:x.description||''}))],
+['DuckDuckGo (resposta rápida)',12,async q=>{const d=await j(`https://api.duckduckgo.com/?q=${E(q)}&format=json&no_html=1&skip_disambig=1`),o=[];if(d.AbstractURL)o.push({t:d.Heading||q,u:d.AbstractURL,s:d.AbstractText||''});(d.RelatedTopics||[]).flatMap(x=>x.Topics||[x]).slice(0,8).forEach(x=>x.FirstURL&&o.push({t:strip(x.Text).slice(0,90)||x.FirstURL,u:x.FirstURL,s:strip(x.Text)}));return o}],
+['Internet Archive',15,async q=>(await j(`https://archive.org/advancedsearch.php?q=${E(q)}&fl[]=identifier&fl[]=title&fl[]=description&rows=10&output=json`)).response.docs.map(x=>({t:strip(Array.isArray(x.title)?x.title[0]:x.title)||x.identifier,u:'https://archive.org/details/'+x.identifier,s:strip(Array.isArray(x.description)?x.description[0]:x.description).slice(0,200)}))],
+['Open Library',14,async q=>(await j(`https://openlibrary.org/search.json?q=${E(q)}&limit=10&fields=key,title,author_name,first_publish_year`)).docs.map(x=>({t:x.title,u:'https://openlibrary.org'+x.key,s:[(x.author_name||[]).slice(0,2).join(', '),x.first_publish_year].filter(Boolean).join(' · ')}))],
+['Crossref (artigos)',14,async q=>(await j(`https://api.crossref.org/works?query=${E(q)}&rows=8&select=DOI,title,container-title`)).message.items.map(x=>({t:(x.title||[])[0]||x.DOI,u:'https://doi.org/'+x.DOI,s:(x['container-title']||[])[0]||''}))],
+['GitHub',10,async q=>(await j(`https://api.github.com/search/repositories?q=${E(q)}&per_page=8`)).items.map(x=>({t:x.full_name,u:x.html_url,s:(x.description||'')+' · ★'+x.stargazers_count}))],
+['Hacker News',8,async q=>(await j(`https://hn.algolia.com/api/v1/search?query=${E(q)}&hitsPerPage=8&tags=story`)).hits.filter(x=>x.url||x.objectID).map(x=>({t:x.title||x.story_title||'(sem título)',u:x.url||'https://news.ycombinator.com/item?id='+x.objectID,s:(x.points||0)+' pontos'}))]];
+function score(x,q){const S=GCX.safety(x.u,{}),w=q.toLowerCase(),why=S.why.slice();let rel=x.auth;why.push('+'+x.auth+' fonte '+x.src);
+ if(x.t.toLowerCase().includes(w)){rel+=30;why.push('+30 palavra no título')}if(x.s&&x.s.toLowerCase().includes(w)){rel+=15;why.push('+15 palavra no resumo')}if(x.s&&x.s.length>40){rel+=10;why.push('+10 tem descrição')}
+ if(x.n>1){rel+=10*(x.n-1);why.push('+'+10*(x.n-1)+' encontrado em '+x.n+' fontes')}rel=Math.min(100,rel+10);return{seg:S.s,rel,tot:Math.round(S.s*.5+rel*.5),why}}
+async function search(q){q=q.trim();if(!q)return;st.hist=[q,...st.hist.filter(h=>h.toLowerCase()!==q.toLowerCase())].slice(0,10);save();hist();ahm(q);
+ const status={};SRC.forEach(([n])=>status[n]={s:'a procurar…'});const paint=()=>$('st').innerHTML=Object.entries(status).map(([n,v])=>`<span>${esc(n)}: <b class="${v.ok?'ok':v.err?'er':''}">${esc(v.s)}</b></span>`).join('');paint();
+ $('res').innerHTML='<div class="card hint">A procurar em '+SRC.length+' fontes…</div>';const all=[];
+ await Promise.all(SRC.map(async([n,a,f])=>{try{const r=(await f(q)).filter(x=>x&&x.u);r.forEach(x=>all.push({...x,src:n,auth:a}));status[n]={s:r.length+' resultados',ok:1}}catch(e){status[n]={s:'erro ('+e.message+')',err:1}}paint();merge(q,all,status)}));}
+function merge(q,all,status){const m=new Map();all.forEach(x=>{const k=x.u.replace(/\/$/,'');const o=m.get(k);if(o){o.n++;o.srcs.push(x.src);if(x.auth>o.auth){o.auth=x.auth;o.src=x.src}if(!o.s&&x.s)o.s=x.s}else m.set(k,{...x,n:1,srcs:[x.src]})});
+ const R=[...m.values()].map(x=>({...x,...score(x,q)}));st.last={q,R,status,when:Date.now()};save();render()}
+const col=s=>s>=75?'#1a7f37':s>=55?'#0969da':s>=35?'#9a6700':'#cf222e';
+function render(){document.querySelectorAll('[data-o]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.o===st.ord));const L=st.last;if(!L){$('res').innerHTML='';return}
+ const R=L.R.slice().sort(st.ord==='alf'?(a,b)=>a.t.localeCompare(b.t,'pt'):st.ord==='rel'?(a,b)=>b.rel-a.rel||b.seg-a.seg:(a,b)=>b.seg-a.seg||b.rel-a.rel);
+ $('cnt').textContent=`· ${R.length} links para «${L.q}» · ${new Date(L.when).toLocaleString('pt-PT',{timeZone:'Atlantic/Azores',dateStyle:'short',timeStyle:'short'})} (Açores)`;
+ $('res').innerHTML=R.length?'':'<div class="card hint">Nenhuma fonte devolveu resultados.</div>';
+ R.forEach(x=>{const v=st.ord==='seg'?x.seg:st.ord==='rel'?x.rel:x.tot,on=/\.onion$/i.test(new URL(x.u).hostname),d=document.createElement('div');d.className='card'+(on?' onion':'');
+ d.innerHTML=`<div class="r"><div class="sc" style="background:${col(v)}" title="segurança ${x.seg} · relevância ${x.rel}">${v}</div><div class="b"><div class="t">${esc(x.t)}<span class="tag">${esc(x.srcs.join(' + '))}</span></div><div class="u">${esc(x.u)}</div>${x.s?`<div class="s">${esc(x.s.slice(0,220))}</div>`:''}<div class="why">Segurança ${x.seg}/100 · relevância ${x.rel}/100. Porquê: ${esc(x.why.join(' · '))}</div>
+ <div class="row" style="margin-top:8px">${on?'<span class="tag">⚠ .onion — só no Tor</span>':`<a class="btn" href="${esc(x.u)}" target="_blank" rel="noopener noreferrer">Abrir</a>`}<a class="btn sec" href="${esc(GCX.vt(x.u))}" target="_blank" rel="noopener">VirusTotal</a><button class="sec cp">Copiar</button></div></div></div>`;
+ d.querySelector('.cp').onclick=async e=>{await GCX.copy(x.u);e.target.textContent='Copiado ✓';setTimeout(()=>e.target.textContent='Copiar',1500)};$('res').appendChild(d)});
+ if(L.status&&!$('st').querySelector('b'))$('st').innerHTML=Object.entries(L.status).map(([n,v])=>`<span>${esc(n)}: <b class="${v.ok?'ok':v.err?'er':''}">${esc(v.s)}</b></span>`).join('')}
+function hist(){$('hist').innerHTML='';st.hist.forEach(h=>{const b=document.createElement('button');b.className='sec';b.textContent=h;b.onclick=()=>{$('q').value=h;search(h)};$('hist').appendChild(b)})}
+function ahm(q){$('ahm').href='https://ahmia.fi/search/?q='+E(q);$('ahm').dataset.q=q}
+$('ahmo').onclick=async()=>{const q=$('ahm').dataset.q||$('q').value;await GCX.copy(AHMIA_ONION+E(q));$('ahmm').textContent='Copiado. Cola no Onion Browser / Tor Browser.'};
+document.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{st.ord=b.dataset.o;save();render()});
+$('f').onsubmit=e=>{e.preventDefault();$('q').blur();search($('q').value)};
+hist();ahm(st.last?st.last.q:'');if(st.last)$('q').value=st.last.q;render();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script></body></html>

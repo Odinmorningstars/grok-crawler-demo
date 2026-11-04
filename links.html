@@ -25,8 +25,11 @@ input,select{background:var(--bg);color:var(--tx);padding:0 12px;width:100%;min-
 #toast{z-index:10;position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%);background:#1f2328;color:#fff;border-radius:12px;padding:8px 8px 8px 16px;display:none;align-items:center;gap:12px;box-shadow:0 6px 24px #0006;max-width:calc(100% - 32px);z-index:9}
 #toast.show{display:flex}#toast button{min-height:44px}
 .empty{color:var(--mu);text-align:center;padding:20px}
+.bl{display:flex;gap:10px;align-items:flex-start}.sc{min-width:52px;text-align:center;font-weight:700;border-radius:10px;padding:8px 4px;color:#fff}.bl .b{flex:1;min-width:0}.why{color:var(--mu);font-size:13px}
+.bl .row{align-items:flex-start}details.as{position:relative}details.as summary{list-style:none;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid var(--bd);background:var(--sec);cursor:pointer;padding:0 14px}details.as summary::-webkit-details-marker{display:none}
+details.as .m{display:flex;flex-direction:column;gap:6px;margin-top:6px}.tag{font-size:12px;border-radius:6px;padding:2px 6px;background:var(--sec);color:var(--mu);margin-left:6px}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
-</style></head><body><main>
+</style><style id="gcnavcss">#gcnav{position:sticky;top:0;z-index:9;display:flex;gap:6px;flex-wrap:wrap;padding:8px 0;margin:-8px 0 8px;background:var(--bg,#0d1117)}#gcnav a{min-height:44px;display:inline-flex;align-items:center;padding:0 14px;border-radius:10px;text-decoration:none;font:600 15px -apple-system,system-ui,sans-serif;border:1px solid var(--bd,#30363d);color:var(--tx,#e6edf3);background:var(--card,#161b22)}#gcnav a[aria-current]{background:#1f6feb;color:#fff;border-color:#1f6feb}</style></head><body><main><nav id="gcnav" aria-label="Páginas"><a href="index.html">1 Crawler</a><a href="links.html" aria-current="page">2 Links</a><a href="procura.html">3 Procura profunda</a><a href="tempo-real.html">📡 Tempo real</a></nav>
 <h1>🕷️ Os meus links <small style="font-size:14px;color:var(--mu);font-weight:400">· com Grok Crawler</small></h1>
 <div class="row"><button class="big" id="both">Abrir os dois (links + tempo real)</button><a class="btn sec" href="tempo-real.html" style="flex:0 1 200px">Só tempo real →</a></div>
 <p class="hint">No iPad: mantém o dedo em <a href="tempo-real.html" target="_blank" rel="noopener">tempo-real.html</a> e escolhe "Abrir em Split View" para veres as duas páginas lado a lado. Para teres como app: Partilhar → "Adicionar ao ecrã principal".</p>
@@ -43,6 +46,11 @@ input,select{background:var(--bg);color:var(--tx);padding:0 12px;width:100%;min-
 <p class="hint">O botão VirusTotal abre a página de análise do endereço no VirusTotal; a verificação é feita lá por ti.</p>
 <div class="row"><button class="sec" id="exp">Exportar cópia (JSON)</button><button class="sec" id="imp">Importar cópia</button><input type="file" id="impf" accept="application/json,.json" hidden></div></div>
 
+<h2>Melhores links encontrados <small id="bcnt"></small></h2>
+<div class="card"><p class="hint" style="margin-top:0">Junta os teus links guardados com o que a aranha encontra aqui e na <a href="index.html">página 1</a>. A lista cresce para baixo, ordenada do melhor para o pior. A pontuação é uma heurística (HTTPS, domínio conhecido, favorito, sem IP), não é uma análise de segurança. Os links da página 1 são de um site simulado e aparecem assinalados.</p>
+<p class="hint">O Osiris é outro site; os modos "maritime", "flights" e "cctv" são parâmetros de camadas que podem mudar sem aviso.</p>
+<div class="row"><button class="sec" id="bclr" style="flex:0 1 220px">Limpar encontrados</button></div></div>
+<div id="best"></div>
 <h2>Notas à mão</h2>
 <div class="card"><div class="tools" role="toolbar" aria-label="Ferramentas de desenho">
 <button class="sw on" data-c="#1a1a2e" style="background:#1a1a2e" aria-label="Preto"></button><button class="sw" data-c="#1f6feb" style="background:#1f6feb" aria-label="Azul"></button><button class="sw" data-c="#d1242f" style="background:#d1242f" aria-label="Vermelho"></button><button class="sw" data-c="#1a7f37" style="background:#1a7f37" aria-label="Verde"></button><button class="sw" data-c="#bf8700" style="background:#bf8700" aria-label="Dourado"></button>
@@ -110,5 +118,27 @@ $('png').onclick=()=>{const o=document.createElement('canvas');o.width=C.width;o
 const sv=localStorage.getItem(PK);if(sv){img=new Image();img.onload=draw;img.src=sv}
 let lw=0;addEventListener('resize',()=>{if(C.clientWidth!==lw){lw=C.clientWidth;size()}});lw=C.clientWidth;size();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+<script src="gc-common.js"></script>
+<script>
+(()=>{const FK='gc_found_v1',$=id=>document.getElementById(id);let shown=new Set();
+const col=s=>s>=80?'#1a7f37':s>=60?'#0969da':s>=40?'#9a6700':'#cf222e';
+function data(){let F=[];try{F=JSON.parse(localStorage.getItem(FK)||'[]')}catch(e){}const m=new Map();
+ (JSON.parse(localStorage.getItem('gc_links_v1')||'[]')).forEach(l=>m.set(l.u,{t:l.t,u:l.u,fav:!!l.f,src:'guardado'}));
+ F.forEach(f=>{if(!f||!f.url)return;const demo=/simulado/.test(f.origem||'');if(!m.has(f.url))m.set(f.url,{t:f.titulo||f.url,u:f.url,demo,src:f.origem||'crawler'})});
+ return[...m.values()].map(x=>({...x,...GCX.safety(x.u,x)})).sort((a,b)=>b.s-a.s||a.t.localeCompare(b.t,'pt'))}
+function row(x){const d=document.createElement('div');d.className='card';d.innerHTML='<div class="bl"><div class="sc"></div><div class="b"><div class="t" style="font-weight:600"></div><div class="u hint" style="word-break:break-all"></div><div class="why"></div><div class="row" style="margin-top:8px"><a class="btn" target="_blank" rel="noopener">Abrir</a><details class="as"><summary>Abrir como…</summary><div class="m"></div></details><button class="sec cp">Copiar</button></div></div></div>';
+ d.querySelector('.sc').textContent=x.s;d.querySelector('.sc').style.background=col(x.s);d.querySelector('.t').textContent=x.t;const tg=document.createElement('span');tg.className='tag';tg.textContent=x.demo?'simulado':x.src;d.querySelector('.t').appendChild(tg);
+ d.querySelector('.u').textContent=x.u;d.querySelector('.why').textContent='Porquê: '+x.why.join(' · ');const a=d.querySelector('a.btn');
+ if(x.demo){a.removeAttribute('href');a.textContent='Não existe (simulado)';a.className='btn sec';a.setAttribute('aria-disabled','true')}else a.href=x.u;
+ const m=d.querySelector('.m');const add=(t,h)=>{const e=document.createElement('a');e.className='btn sec';e.target='_blank';e.rel='noopener';e.href=h;e.textContent=t;m.appendChild(e)};
+ if(!x.demo)add('Novo separador',x.u);add('Verificar no VirusTotal',GCX.vt(x.u));GCX.osirisLinks().forEach(([t,h])=>add(t+' (outro site)',h));
+ d.querySelector('.cp').onclick=async()=>{await GCX.copy(x.u);const b=d.querySelector('.cp');b.textContent='Copiado ✓';setTimeout(()=>b.textContent='Copiar',1500)};return d}
+let last='';function render(){const D=data(),k=D.map(x=>x.u+x.s).join('|');if(k===last)return;last=k;const B=$('best');B.innerHTML='';
+ D.forEach((x,i)=>{const r=row(x);if(!shown.has(x.u)&&shown.size){r.style.borderColor='var(--ac)'}B.appendChild(r)});shown=new Set(D.map(x=>x.u));
+ $('bcnt').textContent=D.length+' links · '+D.filter(x=>!/guardado/.test(x.src)).length+' encontrados pela aranha'}
+$('bclr').onclick=()=>{localStorage.removeItem(FK);last='';render()};
+addEventListener('storage',e=>{if(e.key===FK||e.key==='gc_links_v1')render()});addEventListener('gc-found',render);
+new MutationObserver(()=>setTimeout(render,80)).observe($('list'),{childList:true});setInterval(()=>{if(!document.hidden)render()},3000);render()})();
 </script>
 <script src="crawler.js"></script></body></html>
