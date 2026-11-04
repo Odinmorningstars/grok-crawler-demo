@@ -5,7 +5,7 @@
 <style>
 :root{--bg:#0d1117;--card:#161b22;--bd:#30363d;--tx:#e6edf3;--mu:#8b949e;--sec:#21262d;--ac:#58a6ff}
 @media (prefers-color-scheme:light){:root{--bg:#f6f8fa;--card:#fff;--bd:#d0d7de;--tx:#1f2328;--mu:#59636e;--sec:#eaeef2;--ac:#0969da}}
-*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;font:17px -apple-system,system-ui,sans-serif;background:var(--bg);color:var(--tx);padding:16px;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 80px max(16px,env(safe-area-inset-left));overflow-x:hidden}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;font:17px -apple-system,system-ui,sans-serif;background:var(--bg);color:var(--tx);padding:16px;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 200px max(16px,env(safe-area-inset-left));overflow-x:hidden}
 main{max-width:980px;margin:0 auto}
 h1{margin:4px 0 12px;font-size:26px}h2{font-size:20px;margin:24px 0 10px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}h2 small{font-size:14px;color:var(--mu);font-weight:400}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px;min-width:0}
@@ -22,12 +22,12 @@ input,select{background:var(--bg);color:var(--tx);padding:0 12px;width:100%;min-
 #pad{width:100%;height:380px;background:#f6f3e8;border-radius:12px;touch-action:pan-y;display:block}
 .tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:center}.tools>*{flex:0 0 auto}
 .sw{width:48px;padding:0;border:3px solid var(--bd)}.sw.on{outline:3px solid var(--ac)}
-#toast{position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%);background:#1f2328;color:#fff;border-radius:12px;padding:8px 8px 8px 16px;display:none;align-items:center;gap:12px;box-shadow:0 6px 24px #0006;max-width:calc(100% - 32px);z-index:9}
+#toast{z-index:10;position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%);background:#1f2328;color:#fff;border-radius:12px;padding:8px 8px 8px 16px;display:none;align-items:center;gap:12px;box-shadow:0 6px 24px #0006;max-width:calc(100% - 32px);z-index:9}
 #toast.show{display:flex}#toast button{min-height:44px}
 .empty{color:var(--mu);text-align:center;padding:20px}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style></head><body><main>
-<h1>🕷️ Os meus links</h1>
+<h1>🕷️ Os meus links <small style="font-size:14px;color:var(--mu);font-weight:400">· com Grok Crawler</small></h1>
 <div class="row"><button class="big" id="both">Abrir os dois (links + tempo real)</button><a class="btn sec" href="tempo-real.html" style="flex:0 1 200px">Só tempo real →</a></div>
 <p class="hint">No iPad: mantém o dedo em <a href="tempo-real.html" target="_blank" rel="noopener">tempo-real.html</a> e escolhe "Abrir em Split View" para veres as duas páginas lado a lado. Para teres como app: Partilhar → "Adicionar ao ecrã principal".</p>
 
@@ -110,4 +110,5 @@ $('png').onclick=()=>{const o=document.createElement('canvas');o.width=C.width;o
 const sv=localStorage.getItem(PK);if(sv){img=new Image();img.onload=draw;img.src=sv}
 let lw=0;addEventListener('resize',()=>{if(C.clientWidth!==lw){lw=C.clientWidth;size()}});lw=C.clientWidth;size();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-</script></body></html>
+</script>
+<script src="crawler.js"></script></body></html>
