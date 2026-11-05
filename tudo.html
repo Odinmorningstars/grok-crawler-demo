@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-PT"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-180.png">
+<title>Abrir tudo</title>
+<style>
+:root{color-scheme:dark light}
+body{margin:0;font:17px/1.4 -apple-system,system-ui,sans-serif;background:#0b1020;color:#e8ecff;padding:max(20px,env(safe-area-inset-top)) 18px 40px}
+@media (prefers-color-scheme:light){body{background:#f4f6ff;color:#101428}.card{background:#fff!important;border-color:#d5daf0!important}}
+main{max-width:640px;margin:0 auto}
+h1{font-size:26px;margin:0 0 6px}p{margin:6px 0 16px;opacity:.8}
+.all{display:block;width:100%;min-height:64px;font-size:20px;font-weight:700;border:0;border-radius:16px;background:#4f7cff;color:#fff;margin:14px 0}
+.card{display:flex;align-items:center;gap:12px;min-height:56px;padding:10px 14px;margin:10px 0;border:1px solid #2a3560;border-radius:14px;background:#141b36;color:inherit;text-decoration:none}
+.card b{display:block}.card small{opacity:.7}
+.n{font-size:13px;opacity:.7}
+#msg{min-height:1.4em;font-size:15px;color:#ffd166}
+</style></head><body><main>
+<h1>Abrir tudo</h1>
+<p>Um toque abre as páginas do Grok Crawler. Podes também abrir cada uma em separado.</p>
+<button class="all" id="all">Abrir tudo</button>
+<div id="msg"></div>
+<a class="card" href="index.html" target="_blank" rel="noopener"><span>1</span><span><b>Crawler original</b><small>aranha, modos e aceleração</small></span></a>
+<a class="card" href="links.html" target="_blank" rel="noopener"><span>2</span><span><b>Os meus links</b><small>links guardados e melhores encontrados</small></span></a>
+<a class="card" href="procura.html" target="_blank" rel="noopener"><span>3</span><span><b>Procura profunda</b><small>uma palavra, vários sítios</small></span></a>
+<a class="card" href="tempo-real.html" target="_blank" rel="noopener"><span>4</span><span><b>Tempo real</b><small>hora, tempo, mar e sismos</small></span></a>
+<a class="card" href="https://www.osirisai.live/?layers=maritime" target="_blank" rel="noopener"><span>5</span><span><b>Osiris (outro site)</b><small>camada marítima</small></span></a>
+<p class="n">O Safari costuma deixar abrir só uma página por toque. Se abrir só uma, aparece um aviso de pop-ups: escolhe Permitir e toca outra vez em Abrir tudo.</p>
+<script>
+var urls=['index.html','links.html','procura.html','tempo-real.html','https://www.osirisai.live/?layers=maritime'];
+document.getElementById('all').onclick=function(){
+  var ok=0;
+  urls.forEach(function(u){var w=window.open(u,'_blank');if(w)ok++;});
+  document.getElementById('msg').textContent=ok===urls.length?'Abri '+ok+' separadores.':'Só abriram '+ok+' de '+urls.length+'. Permite pop-ups no aviso do Safari e toca outra vez, ou usa os cartões abaixo.';
+};
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+</script></main></body></html>
