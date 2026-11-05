@@ -23,7 +23,7 @@ const css=document.createElement('style');css.textContent=`
 const cv=document.createElement('canvas');cv.id='gcv';cv.setAttribute('aria-hidden','true');document.body.appendChild(cv);const ctx=cv.getContext('2d');
 const pn=document.createElement('div');pn.id='gcp';pn.setAttribute('role','region');pn.setAttribute('aria-label','Grok Crawler');
 pn.innerHTML=`<div class="bar"><button id="gcOn" aria-pressed="true"></button><button id="gcGrok" title="Alternar AUTOMÁTICO / MANUAL"></button></div>
-<div class="cnt" id="gcC"></div><div class="st" id="gcS"></div><details id="gcD"><summary>Links detetados</summary><ul id="gcL"></ul></details>`;document.body.appendChild(pn);
+<div class="st" id="gcG" style="color:#ffd24a"></div><div class="cnt" id="gcC"></div><div class="st" id="gcS"></div><details id="gcD"><summary>Links detetados</summary><ul id="gcL"></ul></details>`;document.body.appendChild(pn);
 const $=id=>document.getElementById(id);
 let on=localStorage.getItem(KEY)!=='0',mode='auto',W=0,H=0,dp=1;
 function size(){dp=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*dp;cv.height=H*dp;ctx.setTransform(dp,0,0,dp,0,0)}
@@ -32,7 +32,8 @@ let T=[];// {el,kind:'card'|'ui',cls,why,title,url,card}
 function scan(){T=[];document.querySelectorAll('#list .link').forEach(card=>{const u=(card.querySelector('.u')||{}).textContent||'',t=(card.querySelector('.t')||{}).textContent||u,fav=(card.querySelector('.fav')||{}).textContent==='★';
 const[c,why]=classify(u,fav);card.dataset.gcClass=c;T.push({el:card,kind:'card',cls:c,why,title:t,url:u});
 card.querySelectorAll('a.btn,.cp').forEach(b=>T.push({el:b,kind:'btn',cls:c,card}))});
-document.querySelectorAll('main > .row button, main > .row a, #sf input, #sf button, #flt, #onlyFav, #af input, #af button, #pad, .tools button').forEach(el=>T.push({el,kind:'ui',cls:null}));
+document.querySelectorAll('#best > .card').forEach(card=>{const u=(card.querySelector('.u')||{}).textContent||'',tt=card.querySelector('.t'),t=tt&&tt.firstChild?tt.firstChild.textContent:u;if(!u)return;const[c,why]=classify(u,false);T.push({el:card,kind:'card',best:1,isNew:card.dataset.new==='1',cls:c,why:why+' · encontrado',title:t,url:u})});
+document.querySelectorAll('#goalIn, #gf button, main > .row button, main > .row a, #sf input, #sf button, #flt, #onlyFav, #af input, #af button, #pad, .tools button').forEach(el=>T.push({el,kind:'ui',cls:null}));
 lastHit=null;rects(true);renderPanel()}
 let rectT=0;function rects(force){if(!force&&performance.now()-rectT<120)return;rectT=performance.now();for(const t of T){const r=t.el.getBoundingClientRect();t.r=r;t.vis=r.width>0&&r.bottom>0&&r.top<H&&r.right>0&&r.left<W;t.cx=r.left+r.width/2;t.cy=r.top+r.height/2}}
 // aranha
@@ -51,7 +52,7 @@ P.ps=e.pointerType==='pen'&&P.down?(e.pressure||.5):0;P.tiltX=e.tiltX||0;P.tiltY
 addEventListener('pointerup',e=>{P.down=false;P.ps=0},{passive:true,capture:true});
 // automático: escolhe o alvo visível mais próximo ainda não visitado
 function pick(){const v=T.filter(t=>t.vis&&t.kind!=='btn');if(!v.length){S.goal=null;S.tx=W*(.2+Math.random()*.6);S.ty=H*(.2+Math.random()*.6);return}
-let c=v.filter(t=>!seen.has(t.el));if(!c.length){seen.clear();c=v}c.sort((a,b)=>Math.hypot(a.cx-S.x,a.cy-S.y)-Math.hypot(b.cx-S.x,b.cy-S.y));const g=c[Math.min(c.length-1,Math.floor(Math.random()*2))];S.goal=g;seen.add(g.el)}
+let c=v.filter(t=>!seen.has(t.el));const nw=c.filter(t=>t.isNew);if(nw.length)c=nw;if(!c.length){seen.clear();c=v}c.sort((a,b)=>Math.hypot(a.cx-S.x,a.cy-S.y)-Math.hypot(b.cx-S.x,b.cy-S.y));const g=c[Math.min(c.length-1,Math.floor(Math.random()*2))];S.goal=g;seen.add(g.el)}
 let lastHit=null,hitKey='';
 function step(){S.t++;rects();let tx,ty,sp;
 if(mode==='manual'&&P.last){tx=P.x;ty=P.y;sp=.25;const tl=Math.hypot(P.tiltX,P.tiltY);S.R=lerp(S.R,clamp(S.Rb*(P.type==='pen'?(P.down?.7+P.ps*1.1:1.15):1)+tl*.6,50,260),.15)}
@@ -91,7 +92,7 @@ ctx.fillStyle='#ff4f8b';ctx.beginPath();arc(-12,0,3.5+(RM?0:br),0,TAU);ctx.fill(
 function renderPanel(){const cards=T.filter(t=>t.kind==='card'),c={vermelho:0,azul:0,verde:0,dourado:0};cards.forEach(t=>c[t.cls]++);
 $('gcC').innerHTML=Object.keys(c).map(k=>`<span title="${NOME[k]}"><i style="background:${COR[k]}"></i>${NOME[k]} <b data-c="${k}">${c[k]}</b></span>`).join('');
 const det=[...detected].filter(t=>t.kind==='card');$('gcS').textContent=on?`${cards.length} links classificados · ${det.length} no raio agora · modo ${mode==='auto'?'AUTOMÁTICO':'MANUAL'}`:'Crawler desligado';
-const L=$('gcL');L.innerHTML='';cards.forEach(t=>{const li=document.createElement('li');li.innerHTML='<i></i><span><b></b><br><small></small></span>';li.querySelector('i').style.cssText=`background:${COR[t.cls]};height:12px;border-radius:50%`;li.querySelector('b').textContent=(detected.has(t)?'● ':'')+t.title;li.querySelector('small').textContent=NOME[t.cls]+' — '+t.why;L.appendChild(li)})}
+const G=window.GCX&&GCX.getGoal(),GS=G&&GCX.getStatus();$('gcG').textContent=G?'Objetivo: '+G.g+' · '+(GS&&GS.g===G.g?GS.state:'à espera'):'';const L=$('gcL');L.innerHTML='';cards.forEach(t=>{const li=document.createElement('li');li.innerHTML='<i></i><span><b></b><br><small></small></span>';li.querySelector('i').style.cssText=`background:${COR[t.cls]};height:12px;border-radius:50%`;li.querySelector('b').textContent=(detected.has(t)?'● ':'')+t.title;li.querySelector('small').textContent=NOME[t.cls]+' — '+t.why;L.appendChild(li)})}
 function ui(){$('gcOn').textContent=on?'🕷️ Crawler ligado':'🕷️ Crawler desligado';$('gcOn').classList.toggle('on',on);$('gcOn').setAttribute('aria-pressed',on);
 $('gcGrok').textContent=mode==='auto'?'GROK · AUTO':'GROK · MANUAL';$('gcGrok').className=mode==='auto'?'auto':'man';$('gcGrok').disabled=!on;cv.style.display=on?'':'none';
 if(!on){document.querySelectorAll('.gc-hit').forEach(e=>e.classList.remove('gc-hit'));hitKey=''}renderPanel()}
@@ -100,11 +101,12 @@ $('gcGrok').onclick=()=>{mode=mode==='auto'?'manual':'auto';P.last=0;S.goal=null
 addEventListener('keydown',e=>{if(e.target.closest('input,textarea,select'))return;if(e.key==='m'||e.key==='M')$('gcGrok').click();if(e.key==='+')S.Rb=Math.min(260,S.Rb+15);if(e.key==='-')S.Rb=Math.max(50,S.Rb-15)});
 // re-scan quando a lista muda
 let mt;new MutationObserver(()=>{clearTimeout(mt);mt=setTimeout(scan,60)}).observe($('list'),{childList:true,subtree:true,characterData:true});
+if($('best'))new MutationObserver(()=>{clearTimeout(mt);mt=setTimeout(()=>{scan();if(mode==='auto'){S.goal=null;S.wait=0}},60)}).observe($('best'),{childList:true});
 addEventListener('scroll',()=>rects(true),{passive:true});addEventListener('resize',()=>{size();rects(true)});
 if(innerWidth<900)$('gcD').open=false;
 let raf=0;function frame(){raf=0;if(!on||document.hidden)return;step();draw();raf=requestAnimationFrame(frame)}
 function loop(){if(!raf&&on&&!document.hidden)raf=requestAnimationFrame(frame)}
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&raf){cancelAnimationFrame(raf);raf=0}else loop()});
-size();scan();ui();loop();
+size();scan();ui();loop();addEventListener('gc-goal-status',renderPanel);addEventListener('gc-goal',renderPanel);
 window.GC={get targets(){return T},get detected(){return detected},get state(){return{on,mode,x:S.x,y:S.y,R:S.R}},scan};
 })();

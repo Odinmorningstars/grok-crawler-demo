@@ -34,6 +34,9 @@ details.as .m{display:flex;flex-direction:column;gap:6px;margin-top:6px}.tag{fon
 <div class="row"><button class="big" id="both">Abrir os dois (links + tempo real)</button><a class="btn sec" href="tempo-real.html" style="flex:0 1 200px">Só tempo real →</a></div>
 <p class="hint">No iPad: mantém o dedo em <a href="tempo-real.html" target="_blank" rel="noopener">tempo-real.html</a> e escolhe "Abrir em Split View" para veres as duas páginas lado a lado. Para teres como app: Partilhar → "Adicionar ao ecrã principal".</p>
 
+<h2>Objetivo do crawler</h2>
+<div class="card"><form id="gf" class="row"><input id="goalIn" type="search" placeholder="Sobre o que queres links? (ex.: amor)" enterkeyhint="search" autocomplete="off" aria-label="Objetivo"><button type="submit" style="flex:0 1 160px">Procurar links</button><button type="button" class="sec" id="goalClr" style="flex:0 1 140px">Limpar objetivo</button></form>
+<p class="hint" id="goalSt" aria-live="polite">Sem objetivo. Escreve ou dita uma palavra: o crawler vai buscar links sobre ela em fontes públicas (Wikipédia, Arquivo, Open Library…).</p></div>
 <h2>Pesquisar na internet</h2>
 <div class="card"><form id="sf" class="row"><input id="q" type="search" placeholder="O que queres procurar?" enterkeyhint="search" autocomplete="off" aria-label="Pesquisa">
 <select id="eng" aria-label="Motor"><option value="ddg">DuckDuckGo</option><option value="g">Google</option><option value="n">Notícias</option><option value="i">Imagens</option><option value="yt">YouTube</option><option value="gh">GitHub</option><option value="vt">VirusTotal</option></select>
@@ -123,10 +126,10 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(
 <script>
 (()=>{const FK='gc_found_v1',$=id=>document.getElementById(id);let shown=new Set();
 const col=s=>s>=80?'#1a7f37':s>=60?'#0969da':s>=40?'#9a6700':'#cf222e';
-function data(){let F=[];try{F=JSON.parse(localStorage.getItem(FK)||'[]')}catch(e){}const m=new Map();
+function data(){let F=[];try{F=JSON.parse(localStorage.getItem(FK)||'[]')}catch(e){}const m=new Map(),G=GCX.getGoal(),g=G?G.g.toLowerCase():'';
  (JSON.parse(localStorage.getItem('gc_links_v1')||'[]')).forEach(l=>m.set(l.u,{t:l.t,u:l.u,fav:!!l.f,src:'guardado'}));
- F.forEach(f=>{if(!f||!f.url)return;const demo=/simulado/.test(f.origem||'');if(!m.has(f.url))m.set(f.url,{t:f.titulo||f.url,u:f.url,demo,src:f.origem||'crawler'})});
- return[...m.values()].map(x=>({...x,...GCX.safety(x.u,x)})).sort((a,b)=>b.s-a.s||a.t.localeCompare(b.t,'pt'))}
+ F.forEach(f=>{if(!f||!f.url)return;if(f.objetivo&&(!g||f.objetivo.toLowerCase()!==g))return;const demo=/simulado/.test(f.origem||'');if(!m.has(f.url))m.set(f.url,{t:f.titulo||f.url,u:f.url,demo,src:f.objetivo?f.fonte:(f.origem||'crawler'),goal:f.objetivo,res:f.resumo})});
+ return[...m.values()].map(x=>{const S=GCX.safety(x.u,x);if(g&&(x.goal||(x.t+' '+x.u+' '+(x.res||'')).toLowerCase().includes(g))){S.s=Math.min(100,S.s+10);S.why=S.why.concat('+10 sobre o objetivo «'+G.g+'»');x.hit=1}return{...x,...S}}).sort((a,b)=>(b.hit||0)-(a.hit||0)||b.s-a.s||a.t.localeCompare(b.t,'pt')).slice(0,80)}
 function row(x){const d=document.createElement('div');d.className='card';d.innerHTML='<div class="bl"><div class="sc"></div><div class="b"><div class="t" style="font-weight:600"></div><div class="u hint" style="word-break:break-all"></div><div class="why"></div><div class="row" style="margin-top:8px"><a class="btn" target="_blank" rel="noopener">Abrir</a><details class="as"><summary>Abrir como…</summary><div class="m"></div></details><button class="sec cp">Copiar</button></div></div></div>';
  d.querySelector('.sc').textContent=x.s;d.querySelector('.sc').style.background=col(x.s);d.querySelector('.t').textContent=x.t;const tg=document.createElement('span');tg.className='tag';tg.textContent=x.demo?'simulado':x.src;d.querySelector('.t').appendChild(tg);
  d.querySelector('.u').textContent=x.u;d.querySelector('.why').textContent='Porquê: '+x.why.join(' · ');const a=d.querySelector('a.btn');
@@ -135,8 +138,13 @@ function row(x){const d=document.createElement('div');d.className='card';d.inner
  if(!x.demo)add('Novo separador',x.u);add('Verificar no VirusTotal',GCX.vt(x.u));GCX.osirisLinks().forEach(([t,h])=>add(t+' (outro site)',h));
  d.querySelector('.cp').onclick=async()=>{await GCX.copy(x.u);const b=d.querySelector('.cp');b.textContent='Copiado ✓';setTimeout(()=>b.textContent='Copiar',1500)};return d}
 let last='';function render(){const D=data(),k=D.map(x=>x.u+x.s).join('|');if(k===last)return;last=k;const B=$('best');B.innerHTML='';
- D.forEach((x,i)=>{const r=row(x);if(!shown.has(x.u)&&shown.size){r.style.borderColor='var(--ac)'}B.appendChild(r)});shown=new Set(D.map(x=>x.u));
- $('bcnt').textContent=D.length+' links · '+D.filter(x=>!/guardado/.test(x.src)).length+' encontrados pela aranha'}
+ D.forEach((x,i)=>{const r=row(x);if(!shown.has(x.u)&&shown.size){r.style.borderColor='var(--ac)';r.dataset.new='1'}B.appendChild(r)});shown=new Set(D.map(x=>x.u));
+ const G=GCX.getGoal();$('bcnt').textContent=D.length+' links'+(G?' · '+D.filter(x=>x.hit).length+' sobre «'+G.g+'»':'')}
+function gst(){const G=GCX.getGoal(),S=GCX.getStatus();if(!G){$('goalSt').textContent='Sem objetivo. Escreve ou dita uma palavra: o crawler vai buscar links sobre ela em fontes públicas (Wikipédia, Arquivo, Open Library…).';return}
+ if(document.activeElement!==$('goalIn'))$('goalIn').value=G.g;const src=S&&S.g===G.g&&S.src?Object.entries(S.src).map(([n,v])=>n+': '+v.s).join(' · '):'';$('goalSt').textContent='Objetivo: «'+G.g+'» — '+(S&&S.g===G.g?S.state:'à espera')+(src?' · '+src:'')}
+$('gf').onsubmit=e=>{e.preventDefault();const w=$('goalIn').value.trim();if(!w)return;const G=GCX.getGoal();if(G&&G.g===w){GCX.runGoal(w)}else GCX.setGoal(w);$('goalIn').blur()};
+$('goalClr').onclick=()=>{$('goalIn').value='';GCX.setGoal('');last='';render()};
+addEventListener('gc-goal',()=>{last='';render();gst()});addEventListener('gc-goal-status',gst);gst();
 $('bclr').onclick=()=>{localStorage.removeItem(FK);last='';render()};
 addEventListener('storage',e=>{if(e.key===FK||e.key==='gc_links_v1')render()});addEventListener('gc-found',render);
 new MutationObserver(()=>setTimeout(render,80)).observe($('list'),{childList:true});setInterval(()=>{if(!document.hidden)render()},3000);render()})();

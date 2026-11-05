@@ -1518,5 +1518,15 @@
     step, draw, drawMini, frameTick, buildReport, exportar, setTheme, setPaused, setSpeed, setCount, setMode, resetSite, applyFilter, showIntro, renderTop5 };
 })();
 </script>
+<details id="gcreal" style="position:fixed;z-index:7;left:max(8px,env(safe-area-inset-left));bottom:calc(max(8px,env(safe-area-inset-bottom)) + 46px);max-width:min(360px,calc(100vw - 16px));background:rgba(13,17,23,.94);color:#e6edf3;border:1px solid #2a3240;border-radius:10px;font:13px -apple-system,system-ui,sans-serif"><summary style="padding:10px 12px;cursor:pointer;min-height:40px">🌐 Links reais: <span id="gcrs">muda o objetivo para procurar</span></summary><ol id="gcrl" style="margin:0;padding:0 12px 10px 30px;max-height:40vh;overflow:auto"></ol></details>
+<script src="gc-common.js"></script>
+<script>/* Extra: ao mudar o objetivo, procura também links reais em fontes públicas (o site simulado continua igual). */
+(()=>{const g=document.getElementById('goal'),$=id=>document.getElementById(id);if(!g||!window.GCX)return;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function paint(){const G=GCX.getGoal(),S=GCX.getStatus();if(!G){return}$('gcrs').textContent='«'+G.g+'» · '+(S&&S.g===G.g?S.state:'à espera');
+ let F=[];try{F=JSON.parse(localStorage.getItem('gc_found_v1')||'[]')}catch(e){}F=F.filter(x=>x.objetivo===G.g).map(x=>({...x,s:GCX.safety(x.url,{}).s})).sort((a,b)=>b.s-a.s).slice(0,30);
+ $('gcrl').innerHTML=F.map(x=>'<li style="margin:4px 0"><a target="_blank" rel="noopener" style="color:#5cf2c4" href="'+esc(x.url)+'">'+esc(x.titulo)+'</a> <span style="opacity:.6">'+esc(x.fonte||'')+' · '+x.s+'</span></li>').join('')+(F.length?'<li style="list-style:none;opacity:.7">Lista completa na página 2.</li>':'')}
+g.addEventListener('change',()=>GCX.setGoal(g.value));addEventListener('gc-goal-status',paint);addEventListener('gc-found',paint);addEventListener('gc-goal',paint);paint();})();
+</script>
 </body>
 </html>
