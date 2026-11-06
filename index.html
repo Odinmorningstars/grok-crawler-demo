@@ -223,7 +223,7 @@
 <canvas id="bg"></canvas>
 <div id="page"><button id="grok" type="button">GROK<small>→ manual</small></button></div>
 <canvas id="cv"></canvas>
-<nav id="gcnav" aria-label="Páginas" style="position:fixed;z-index:7;left:0;top:calc(50% - 24px);flex-direction:column;display:flex;gap:4px;font:600 13px -apple-system,system-ui,sans-serif"><a href="index.html" aria-current="page" style="padding:10px 12px;border-radius:10px;background:#5cf2c4;color:#06231b;text-decoration:none">1 Crawler</a><a href="links.html" style="padding:10px 12px;border-radius:10px;background:rgba(20,26,36,.9);color:#e6edf3;text-decoration:none;border:1px solid #2a3240">2 Links</a><a href="procura.html" style="padding:10px 12px;border-radius:10px;background:rgba(20,26,36,.9);color:#e6edf3;text-decoration:none;border:1px solid #2a3240">3 Procura</a></nav>
+<nav id="gcnav" aria-label="Páginas" style="position:fixed;z-index:7;left:0;top:calc(50% + 8px);flex-direction:column;display:flex;gap:6px;font:600 13px -apple-system,system-ui,sans-serif;padding-left:max(0px,env(safe-area-inset-left,0px))"><a href="index.html" aria-current="page" style="padding:12px 14px;min-height:44px;display:flex;align-items:center;border-radius:10px;background:#5cf2c4;color:#06231b;text-decoration:none;touch-action:manipulation">1 Crawler</a><a href="links.html" style="padding:12px 14px;min-height:44px;display:flex;align-items:center;border-radius:10px;background:rgba(20,26,36,.9);color:#e6edf3;text-decoration:none;border:1px solid #2a3240;touch-action:manipulation">2 Links</a><a href="procura.html" style="padding:12px 14px;min-height:44px;display:flex;align-items:center;border-radius:10px;background:rgba(20,26,36,.9);color:#e6edf3;text-decoration:none;border:1px solid #2a3240;touch-action:manipulation">3 Procura</a></nav>
 
 <div id="top">
   <div id="modes">
@@ -1518,38 +1518,164 @@
     step, draw, drawMini, frameTick, buildReport, exportar, setTheme, setPaused, setSpeed, setCount, setMode, resetSite, applyFilter, showIntro, renderTop5 };
 })();
 </script>
-<button id="gclTab" type="button" aria-expanded="false" aria-controls="gclDr" style="position:fixed;z-index:8;left:0;top:calc(50% - 150px);writing-mode:vertical-rl;min-width:40px;min-height:120px;padding:10px 6px;border:1px solid #2a3240;border-left:0;border-radius:0 12px 12px 0;background:rgba(13,17,23,.92);color:#e6edf3;font:600 14px -apple-system,system-ui,sans-serif;touch-action:manipulation;cursor:pointer">🔗 Links <span id="gclN">0</span></button>
-<aside id="gclDr" aria-label="Links detetados" hidden style="position:fixed;z-index:9;left:0;top:0;bottom:0;width:min(380px,92vw);display:flex;flex-direction:column;background:rgba(10,13,19,.97);color:#e6edf3;border-right:1px solid #2a3240;box-shadow:6px 0 30px #0008;font:15px -apple-system,system-ui,sans-serif;padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))">
-<div style="display:flex;align-items:center;gap:8px"><b style="flex:1">🔗 Links detetados <span id="gclC" style="font-weight:400;opacity:.7"></span></b><button id="gclX" type="button" aria-label="Fechar" style="min-width:48px;min-height:48px;border-radius:10px;border:1px solid #2a3240;background:#21262d;color:#e6edf3;font-size:20px">✕</button></div>
-<div id="gclF" role="group" aria-label="Filtrar por cor" style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0"></div>
-<div style="font-size:12px;opacity:.7;margin-bottom:6px">Ordem: melhor → pior (heurística de segurança + pontuação do crawler; não é uma análise). Toca num link para o abrir num separador novo. Os links do site simulado não existem na internet.</div>
-<div id="gclS" style="font-size:12px;color:#ffd24a;margin-bottom:6px"></div>
-<ol id="gclL" style="list-style:none;margin:0;padding:0;overflow:auto;flex:1;-webkit-overflow-scrolling:touch"></ol></aside>
-<style>#gclDr[hidden],#gclTab[hidden]{display:none!important}#gclL li{border-left:4px solid var(--k);background:#161b22;border-radius:8px;margin:0 0 6px;padding:8px}#gclL .o{display:block;color:#e6edf3;text-decoration:none;min-height:40px}#gclL .o b{display:block}#gclL .o small{opacity:.65;word-break:break-all}
-#gclL .sc{float:right;font-weight:700;color:var(--k);margin-left:6px}#gclL details summary{min-height:40px;display:inline-flex;align-items:center;padding:0 12px;border-radius:8px;background:#21262d;cursor:pointer;margin-top:4px;list-style:none}
-#gclL details a{display:flex;align-items:center;min-height:44px;padding:0 10px;margin-top:4px;border-radius:8px;background:#21262d;color:#e6edf3;text-decoration:none}#gclF button{min-height:44px;padding:0 10px;border-radius:10px;border:2px solid var(--k);background:#161b22;color:#e6edf3;font:600 14px system-ui;touch-action:manipulation}#gclF button[aria-pressed=false]{opacity:.4;border-style:dashed}
-@media (prefers-reduced-motion:no-preference){#gclDr{transition:transform .2s}}</style>
+<button id="gclTab" type="button" aria-expanded="false" aria-controls="gclDr" aria-label="Abrir lista de links detetados">🔗 Links <span id="gclN">0</span></button>
+<div id="gclBd" hidden aria-hidden="true"></div>
+<aside id="gclDr" aria-label="Links detetados" hidden>
+<header class="gclH">
+  <b>🔗 Links detetados <span id="gclC"></span></b>
+  <button id="gclX" type="button" aria-label="Fechar barra de links">✕</button>
+</header>
+<div id="gclF" role="group" aria-label="Filtrar por cor"></div>
+<p class="gclHint">Ordem: melhor → pior (heurística de segurança + pontuação do crawler; não é uma análise). Toca num link para o abrir num separador novo — um de cada vez. Os links do site simulado não existem na internet.</p>
+<div id="gclS"></div>
+<ol id="gclL"></ol>
+</aside>
+<style>
+/* Barra de links — iPad (dedo + Apple Pencil): alvos ≥44px, scroll isolado, sem swipe-back */
+#gclTab{
+  position:fixed;z-index:10;left:0;top:calc(50% - 160px);
+  writing-mode:vertical-rl;text-orientation:mixed;
+  min-width:48px;min-height:140px;
+  padding:14px max(10px,env(safe-area-inset-left,0px));
+  border:1px solid #2a3240;border-left:0;border-radius:0 14px 14px 0;
+  background:rgba(13,17,23,.94);color:#e6edf3;
+  font:600 15px -apple-system,system-ui,sans-serif;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;
+  -webkit-touch-callout:none;cursor:pointer;pointer-events:auto;
+}
+#gclTab:active{background:#21262d}
+#gclBd{
+  position:fixed;inset:0;z-index:11;
+  background:rgba(0,0,0,.35);pointer-events:auto;
+  touch-action:none;-webkit-tap-highlight-color:transparent;
+}
+#gclDr{
+  position:fixed;z-index:12;left:0;top:0;bottom:0;
+  width:min(400px,92vw);
+  display:flex;flex-direction:column;
+  background:rgba(10,13,19,.98);color:#e6edf3;
+  border-right:1px solid #2a3240;box-shadow:8px 0 36px #000a;
+  font:16px -apple-system,system-ui,sans-serif;
+  padding:max(12px,env(safe-area-inset-top,0px)) 12px max(12px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));
+  pointer-events:auto;
+  touch-action:pan-y;
+  overscroll-behavior:contain;
+  overscroll-behavior-x:none;
+  -webkit-user-select:none;user-select:none;
+  -webkit-touch-callout:none;
+}
+#gclDr[hidden],#gclTab[hidden],#gclBd[hidden]{display:none!important}
+#gclDr .gclH{display:flex;align-items:center;gap:8px;flex-shrink:0;min-height:48px}
+#gclDr .gclH b{flex:1;font-size:17px;line-height:1.3}
+#gclC{font-weight:400;opacity:.7;font-size:14px}
+#gclX{
+  min-width:48px;min-height:48px;border-radius:12px;
+  border:1px solid #2a3240;background:#21262d;color:#e6edf3;font-size:22px;
+  touch-action:manipulation;-webkit-user-select:none;cursor:pointer;
+}
+#gclX:active{background:#30363d}
+#gclF{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;flex-shrink:0}
+#gclF button{
+  min-height:48px;min-width:48px;padding:0 14px;border-radius:12px;
+  border:2px solid var(--k);background:#161b22;color:#e6edf3;
+  font:600 14px -apple-system,system-ui,sans-serif;
+  touch-action:manipulation;-webkit-user-select:none;cursor:pointer;
+}
+#gclF button[aria-pressed=false]{opacity:.4;border-style:dashed}
+#gclF button:active{transform:scale(.97)}
+.gclHint{font-size:12px;line-height:1.4;opacity:.7;margin:0 0 8px;flex-shrink:0}
+#gclS{font-size:13px;color:#ffd24a;margin-bottom:8px;flex-shrink:0;min-height:1.2em}
+#gclL{
+  list-style:none;margin:0;padding:0 4px 8px 0;flex:1;min-height:0;
+  overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+  overscroll-behavior:contain;
+  overscroll-behavior-x:none;
+}
+#gclL li{
+  border-left:4px solid var(--k);background:#161b22;border-radius:10px;
+  margin:0 0 8px;padding:10px 12px;
+  touch-action:pan-y;
+}
+#gclL .sc{float:right;font-weight:700;color:var(--k);margin:2px 0 0 8px;font-size:15px}
+#gclL .o{
+  display:block;color:#e6edf3;text-decoration:none;
+  min-height:48px;padding:6px 4px;border-radius:8px;
+  touch-action:manipulation;-webkit-user-select:none;
+}
+#gclL a.o:active{background:#21262d}
+#gclL .o b{display:block;font-size:15px;line-height:1.35;padding-right:36px}
+#gclL .o small{display:block;opacity:.65;word-break:break-all;font-size:12px;margin-top:4px;line-height:1.35}
+#gclL details{margin-top:6px}
+#gclL details summary{
+  min-height:48px;display:inline-flex;align-items:center;
+  padding:0 14px;border-radius:10px;background:#21262d;cursor:pointer;
+  list-style:none;touch-action:manipulation;-webkit-user-select:none;
+}
+#gclL details summary::-webkit-details-marker{display:none}
+#gclL details a{
+  display:flex;align-items:center;min-height:48px;
+  padding:0 12px;margin-top:6px;border-radius:10px;
+  background:#21262d;color:#e6edf3;text-decoration:none;
+  touch-action:manipulation;
+}
+#gclL details a:active{background:#30363d}
+@media (prefers-reduced-motion:no-preference){
+  #gclDr{transition:transform .18s ease-out}
+}
+</style>
 <script src="gc-common.js"></script>
-<script>/* Extra (não muda o crawler): objetivo partilhado + barra de links detetados ordenados. */
+<script>/* Extra (não muda o crawler): objetivo partilhado + barra de links detetados — iPad dedo/Pencil. */
 (()=>{const g=document.getElementById('goal'),$=id=>document.getElementById(id);if(!window.GCX)return;
 if(g)g.addEventListener('change',()=>GCX.setGoal(g.value));
 const K={vermelho:'#ff4d4d',azul:'#5ab8ff',verde:'#4be08a',dourado:'#ffd24a'},NM={vermelho:'Vermelho',azul:'Azul',verde:'Verde',dourado:'Dourado'},MAP={mau:'vermelho',medio:'azul',bom:'verde',perfeito:'dourado'};
 const off=new Set(),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const tab=$('gclTab'),dr=$('gclDr'),bd=$('gclBd'),list=$('gclL');
 function items(){let F=[];try{F=JSON.parse(localStorage.getItem('gc_found_v1')||'[]')}catch(e){}const G=GCX.getGoal(),gg=G&&G.g.toLowerCase(),seen=new Set();
  return F.filter(x=>x&&x.url&&!seen.has(x.url)&&seen.add(x.url)).map(x=>{const demo=/simulado/.test(x.origem||''),S=GCX.safety(x.url,{demo});let c=MAP[x.classe]||x.classe;
   if(!K[c]){const hit=gg&&(x.titulo||'').toLowerCase().includes(gg);c=S.s<40?'vermelho':S.s<60?'azul':(hit&&S.s>=80?'dourado':'verde')}
   const sc=demo?Math.round(S.s*.4+(x.pontuacao||0)*.6):S.s;return{...x,demo,c,sc,why:S.why}}).sort((a,b)=>b.sc-a.sc||(b.pontuacao||0)-(a.pontuacao||0))}
 let last='';function paint(force){const I=items(),cnt={vermelho:0,azul:0,verde:0,dourado:0};I.forEach(x=>cnt[x.c]++);$('gclN').textContent=I.length;
- if($('gclDr').hidden&&!force)return;const key=I.map(x=>x.url+x.sc+x.c).join('|')+[...off].join();if(key===last)return;last=key;
+ if(dr.hidden&&!force)return;const key=I.map(x=>x.url+x.sc+x.c).join('|')+[...off].join();if(key===last)return;last=key;
  $('gclF').innerHTML=Object.keys(K).map(k=>`<button type="button" data-k="${k}" aria-pressed="${!off.has(k)}" style="--k:${K[k]}">● ${NM[k]} ${cnt[k]}</button>`).join('');
  const V=I.filter(x=>!off.has(x.c));$('gclC').textContent='· '+V.length+' de '+I.length;const G=GCX.getGoal(),S=GCX.getStatus();$('gclS').textContent=G?'Objetivo: «'+G.g+'» · '+(S&&S.g===G.g?S.state:'à espera'):'';
- $('gclL').innerHTML=V.slice(0,200).map((x,i)=>`<li style="--k:${K[x.c]}"><span class="sc">${x.sc}</span>`+(x.demo?`<span class="o" role="note"><b>${esc(x.titulo)}</b><small>${esc(x.url)} · site simulado, não abre</small></span>`:`<a class="o" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer"><b>${esc(x.titulo)}</b><small>${esc(x.url)}${x.fonte?' · '+esc(x.fonte):''}</small></a>`)
-  +`<details><summary>Abrir como…</summary>${x.demo?'':`<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">Novo separador</a>`}<a href="${esc(GCX.vt(x.url))}" target="_blank" rel="noopener">Verificar no VirusTotal</a>${GCX.osirisLinks().map(([t,h])=>`<a href="${esc(h)}" target="_blank" rel="noopener">${esc(t)} (outro site)</a>`).join('')}</details></li>`).join('')||'<li style="--k:#444">Ainda nada detetado.</li>'}
-function open_(o){$('gclDr').hidden=!o;$('gclTab').hidden=o;$('gclTab').setAttribute('aria-expanded',o);if(o){last='';paint(1)}}
-$('gclTab').onclick=()=>open_(true);$('gclX').onclick=()=>open_(false);
-$('gclF').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;off.has(b.dataset.k)?off.delete(b.dataset.k):off.add(b.dataset.k);paint()});
+ list.innerHTML=V.slice(0,200).map(x=>`<li style="--k:${K[x.c]}"><span class="sc">${x.sc}</span>`+(x.demo?`<span class="o" role="note"><b>${esc(x.titulo)}</b><small>${esc(x.url)} · site simulado, não abre</small></span>`:`<a class="o" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer"><b>${esc(x.titulo)}</b><small>${esc(x.url)}${x.fonte?' · '+esc(x.fonte):''}</small></a>`)
+  +`<details><summary>Abrir como…</summary>${x.demo?'':`<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">Novo separador</a>`}<a href="${esc(GCX.vt(x.url))}" target="_blank" rel="noopener">Verificar no VirusTotal</a>${GCX.osirisLinks().map(([t,h])=>`<a href="${esc(h)}" target="_blank" rel="noopener">${esc(t)} (outro site)</a>`).join('')}</details></li>`).join('')||'<li style="--k:#444"><span class="o" role="note"><b>Ainda nada detetado.</b></span></li>'}
+function open_(o){dr.hidden=!o;tab.hidden=o;bd.hidden=!o;tab.setAttribute('aria-expanded',o?'true':'false');bd.setAttribute('aria-hidden',o?'false':'true');if(o){last='';paint(1);try{list.scrollTop=0}catch(e){}}}
+/* Abrir/fechar e filtros: dedo ou Pencil — só tap/click (a barra não desenha) */
+tab.addEventListener('click',e=>{e.preventDefault();open_(true)});
+$('gclX').addEventListener('click',e=>{e.preventDefault();open_(false)});
+bd.addEventListener('click',e=>{e.preventDefault();open_(false)});
+$('gclF').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;e.preventDefault();off.has(b.dataset.k)?off.delete(b.dataset.k):off.add(b.dataset.k);last='';paint()});
+/* Um link de cada vez: o <a target=_blank> nativo abre só o tocado; bloqueia lote e propagaçao para o canvas */
+let lastOpen=0;
+list.addEventListener('click',e=>{
+  const a=e.target.closest('a[href]');
+  if(!a||!list.contains(a))return;
+  e.stopPropagation();
+  const now=Date.now();
+  if(now-lastOpen<400){e.preventDefault();return} /* evita double-fire dedo+Pencil / click duplicado */
+  lastOpen=now;
+},{capture:true});
+/* Isolar gestos: scroll do drawer não move o canvas; bloquear swipe-back horizontal */
+const trap=(e)=>{e.stopPropagation()};
+['pointerdown','pointermove','pointerup','pointercancel','touchstart','touchmove','touchend','touchcancel','wheel','gesturestart','gesturechange'].forEach(t=>{
+  dr.addEventListener(t,trap,{passive:true,capture:true});
+  bd.addEventListener(t,trap,{passive:true,capture:true});
+  tab.addEventListener(t,trap,{passive:true,capture:true});
+});
+/* Impedir overscroll horizontal (Safari back) a partir da barra */
+dr.addEventListener('touchmove',e=>{
+  if(e.touches.length!==1)return;
+  const t=e.touches[0];
+  if(!dr._tx){dr._tx=t.clientX;dr._ty=t.clientY;return}
+  const dx=t.clientX-dr._tx,dy=t.clientY-dr._ty;
+  if(Math.abs(dx)>Math.abs(dy)+6){e.preventDefault()}
+},{passive:false});
+dr.addEventListener('touchstart',e=>{const t=e.touches[0];dr._tx=t.clientX;dr._ty=t.clientY},{passive:true});
+dr.addEventListener('touchend',()=>{dr._tx=dr._ty=0},{passive:true});
 ['gc-found','gc-goal','gc-goal-status'].forEach(n=>addEventListener(n,()=>paint()));
-['pointerdown','keydown','touchstart','wheel'].forEach(t=>$('gclDr').addEventListener(t,e=>e.stopPropagation(),{passive:true}));
 setInterval(()=>{if(!document.hidden)paint()},1500);paint();})();
 </script>
 </body>
