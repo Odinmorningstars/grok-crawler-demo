@@ -42,13 +42,22 @@ function emit(n){dispatchEvent(new Event(n))}
 function storeFound(g,items){try{let F=JSON.parse(localStorage.getItem(FK)||'[]');const have=new Set(F.map(x=>x.url));items.forEach(x=>{if(have.has(x.u))return;have.add(x.u);F.push({k:x.u,titulo:x.t,url:x.u,resumo:(x.s||'').slice(0,200),fonte:x.src,objetivo:g,hora:Date.now(),origem:'objetivo «'+g+'» · '+x.src})});
  localStorage.setItem(FK,JSON.stringify(F.slice(-400)));emit('gc-found')}catch(e){}}
 let gAC,gT;
-function runGoal(g){clearTimeout(gT);if(gAC)gAC.abort();if(!g)return;gT=setTimeout(async()=>{gAC=new AbortController();const sig=gAC.signal,st={g,state:'a procurar…',src:{},n:0,t:Date.now()};
+function runGoal(g){clearTimeout(gT);if(gAC)gAC.abort();g=String(g||'').trim();if(!g)return;gT=setTimeout(async()=>{gAC=new AbortController();const sig=gAC.signal,st={g,state:'a procurar…',src:{},n:0,t:Date.now()};
  const put=()=>{if(sig.aborted)return;try{localStorage.setItem(GS,JSON.stringify(st))}catch(e){}emit('gc-goal-status')};SRC.forEach(([n])=>st.src[n]={s:'a procurar…'});put();
  const all=[];await searchAll(g,sig,(n,v,r)=>{if(sig.aborted)return;st.src[n]=v;if(r){all.push(...r);storeFound(g,r)}st.n=all.length;put()});
- if(sig.aborted)return;st.state=all.length+' links';st.done=Date.now();put()},400)}
+ if(sig.aborted)return;st.state=all.length+' links';st.done=Date.now();put()},200)}
 function putStatus(o){try{localStorage.setItem(GS,JSON.stringify(Object.assign({t:Date.now()},o)))}catch(e){}emit('gc-goal-status')}
-function setGoal(w,o){w=String(w||'').trim();const cur=getGoal();if(w===(cur&&cur.g||''))return; if(!w){localStorage.removeItem(GK);localStorage.removeItem(GS);if(gAC)gAC.abort();clearTimeout(gT);emit('gc-goal');return}
+function setGoal(w,o){w=String(w||'').trim();const cur=getGoal();if(!(o&&o.force)&&w===(cur&&cur.g||''))return; if(!w){localStorage.removeItem(GK);localStorage.removeItem(GS);if(gAC)gAC.abort();clearTimeout(gT);emit('gc-goal');return}
  localStorage.setItem(GK,JSON.stringify({g:w,t:Date.now()}));emit('gc-goal');if(!(o&&o.noRun))runGoal(w);else{if(gAC)gAC.abort();clearTimeout(gT);putStatus({g:w,state:'a procurar (página 3)…',src:{}})}}
+/* Liga um <input> ao objetivo: input (ditado/teclado iPad) + change + Enter. Debounce curto; cancela procura anterior. */
+function bindGoal(el,opts){if(!el||el._gcBound)return;el._gcBound=1;const ms=(opts&&opts.ms)|0||450;let t;
+ const apply=()=>{clearTimeout(t);const w=String(el.value||'').trim();const cur=getGoal();if(w===(cur&&cur.g||''))return;setGoal(w)};
+ const soon=()=>{clearTimeout(t);t=setTimeout(apply,ms)};
+ el.addEventListener('input',soon);
+ el.addEventListener('change',()=>{clearTimeout(t);apply()});
+ el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();clearTimeout(t);apply();el.blur()}});
+ addEventListener('gc-goal',()=>{const G=getGoal();if(document.activeElement!==el)el.value=G?G.g:el.value});
+ const G0=getGoal();if(G0){if(document.activeElement!==el)el.value=G0.g}else if(String(el.value||'').trim()){setGoal(el.value)}}
 addEventListener('storage',e=>{if(e.key===GK)emit('gc-goal');if(e.key===GS)emit('gc-goal-status');if(e.key===FK)emit('gc-found')});
-window.GCX={safety,osirisLinks,vt,copy,strip,SRC,searchAll,getGoal,getStatus,setGoal,runGoal,storeFound,putStatus};
+window.GCX={safety,osirisLinks,vt,copy,strip,SRC,searchAll,getGoal,getStatus,setGoal,runGoal,storeFound,putStatus,bindGoal};
 })();

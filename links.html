@@ -142,6 +142,7 @@ let last='';function render(){const D=data(),k=D.map(x=>x.u+x.s).join('|');if(k=
  const G=GCX.getGoal();$('bcnt').textContent=D.length+' links'+(G?' · '+D.filter(x=>x.hit).length+' sobre «'+G.g+'»':'')}
 function gst(){const G=GCX.getGoal(),S=GCX.getStatus();if(!G){$('goalSt').textContent='Sem objetivo. Escreve ou dita uma palavra: o crawler vai buscar links sobre ela em fontes públicas (Wikipédia, Arquivo, Open Library…).';return}
  if(document.activeElement!==$('goalIn'))$('goalIn').value=G.g;const src=S&&S.g===G.g&&S.src?Object.entries(S.src).map(([n,v])=>n+': '+v.s).join(' · '):'';$('goalSt').textContent='Objetivo: «'+G.g+'» — '+(S&&S.g===G.g?S.state:'à espera')+(src?' · '+src:'')}
+GCX.bindGoal($('goalIn'),{ms:450});
 $('gf').onsubmit=e=>{e.preventDefault();const w=$('goalIn').value.trim();if(!w)return;const G=GCX.getGoal();if(G&&G.g===w){GCX.runGoal(w)}else GCX.setGoal(w);$('goalIn').blur()};
 $('goalClr').onclick=()=>{$('goalIn').value='';GCX.setGoal('');last='';render()};
 addEventListener('gc-goal',()=>{last='';render();gst()});addEventListener('gc-goal-status',gst);gst();

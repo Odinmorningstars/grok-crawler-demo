@@ -968,7 +968,7 @@
 
   // bloquear gestos do iOS (zoom, duplo toque, lupa, menu de toque longo) fora do painel
   ['gesturestart','gesturechange','gestureend'].forEach(ev => document.addEventListener(ev, e => e.preventDefault(), { passive:false }));
-  document.addEventListener('touchmove', e => { if (!(e.target.closest && e.target.closest('#panelBody,#introCard,input[type=range]'))) e.preventDefault(); }, { passive:false });
+  document.addEventListener('touchmove', e => { if (!(e.target.closest && e.target.closest('#panelBody,#introCard,#goal,#goalBox,#gclDr,#gclL,#gclF,input,textarea'))) e.preventDefault(); }, { passive:false });
   document.addEventListener('touchstart', e => { if (e.touches.length > 1 && !isUI(e.target)) e.preventDefault(); }, { passive:false });
   let lastTouchEnd = 0;
   document.addEventListener('touchend', e => { const now = performance.now();
@@ -1628,13 +1628,14 @@
 <script src="gc-common.js"></script>
 <script>/* Extra (não muda o crawler): objetivo partilhado + barra de links detetados — iPad dedo/Pencil. */
 (()=>{const g=document.getElementById('goal'),$=id=>document.getElementById(id);if(!window.GCX)return;
-if(g)g.addEventListener('change',()=>GCX.setGoal(g.value));
+if(g)GCX.bindGoal(g,{ms:450});
 const K={vermelho:'#ff4d4d',azul:'#5ab8ff',verde:'#4be08a',dourado:'#ffd24a'},NM={vermelho:'Vermelho',azul:'Azul',verde:'Verde',dourado:'Dourado'},MAP={mau:'vermelho',medio:'azul',bom:'verde',perfeito:'dourado'};
 const off=new Set(),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const tab=$('gclTab'),dr=$('gclDr'),bd=$('gclBd'),list=$('gclL');
 function items(){let F=[];try{F=JSON.parse(localStorage.getItem('gc_found_v1')||'[]')}catch(e){}const G=GCX.getGoal(),gg=G&&G.g.toLowerCase(),seen=new Set();
- return F.filter(x=>x&&x.url&&!seen.has(x.url)&&seen.add(x.url)).map(x=>{const demo=/simulado/.test(x.origem||''),S=GCX.safety(x.url,{demo});let c=MAP[x.classe]||x.classe;
-  if(!K[c]){const hit=gg&&(x.titulo||'').toLowerCase().includes(gg);c=S.s<40?'vermelho':S.s<60?'azul':(hit&&S.s>=80?'dourado':'verde')}
+ return F.filter(x=>{if(!x||!x.url||seen.has(x.url))return false;seen.add(x.url);const demo=/simulado/.test(x.origem||'');
+  if(demo)return true;if(!gg)return !x.objetivo;return !x.objetivo||String(x.objetivo).toLowerCase()===gg}).map(x=>{const demo=/simulado/.test(x.origem||''),S=GCX.safety(x.url,{demo});let c=MAP[x.classe]||x.classe;
+  if(!K[c]){const hit=gg&&((x.titulo||'')+(x.resumo||'')).toLowerCase().includes(gg);c=S.s<40?'vermelho':S.s<60?'azul':(hit&&S.s>=80?'dourado':'verde')}
   const sc=demo?Math.round(S.s*.4+(x.pontuacao||0)*.6):S.s;return{...x,demo,c,sc,why:S.why}}).sort((a,b)=>b.sc-a.sc||(b.pontuacao||0)-(a.pontuacao||0))}
 let last='';function paint(force){const I=items(),cnt={vermelho:0,azul:0,verde:0,dourado:0};I.forEach(x=>cnt[x.c]++);$('gclN').textContent=I.length;
  if(dr.hidden&&!force)return;const key=I.map(x=>x.url+x.sc+x.c).join('|')+[...off].join();if(key===last)return;last=key;
